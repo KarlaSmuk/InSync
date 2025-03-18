@@ -3,6 +3,8 @@
 Welcome to the **InSync Backend** repository! This guide will help you set up and run the backend environment for the
 project.
 
+---
+
 ## 📌 Prerequisites
 
 Ensure you have the following installed before proceeding:
@@ -11,6 +13,8 @@ Ensure you have the following installed before proceeding:
 - [pip](https://pip.pypa.io/en/stable/) (comes with Python)
 - [Virtual Environment](https://docs.python.org/3/library/venv.html)
 - [Git](https://git-scm.com/)
+
+---
 
 ## 🚀 Setup Instructions
 
@@ -46,11 +50,17 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 5️⃣ Running FastAPI
+### 5️⃣ Apply Migrations To PostgreSQL Database
 
 ```sh
 cd src
 ```
+
+```sh
+alembic upgrade head
+```
+
+### 6️⃣ Running FastAPI
 
 #### Development Mode
 
