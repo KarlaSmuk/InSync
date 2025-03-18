@@ -1,18 +1,18 @@
 """add user_workspace
 
-Revision ID: 739a94d83762
+Revision ID: 969f5d216414
 Revises: 
-Create Date: 2025-03-18 21:28:55.917836
+Create Date: 2025-03-18 21:46:19.782341
 
 """
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '739a94d83762'
+revision: str = '969f5d216414'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -35,7 +35,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('name', sa.VARCHAR(length=225), nullable=False),
     sa.Column('description', sa.TEXT(), nullable=True),
-    sa.Column('status', sa.VARCHAR(), nullable=False),
+    sa.Column('status', postgresql.ENUM('ACTIVE', 'PLANNING', 'ON_HOLD', 'COMPLETED', name='workspacestatusenum'), nullable=False),
     sa.Column('ownerId', sa.UUID(), nullable=True),
     sa.ForeignKeyConstraint(['ownerId'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')

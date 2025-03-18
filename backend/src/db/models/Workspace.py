@@ -1,9 +1,19 @@
 import uuid
+from enum import Enum
 
-from sqlalchemy import Column, UUID, VARCHAR, TEXT, ForeignKey
+from sqlalchemy import Column, ForeignKey
+# enum for postgres
+from sqlalchemy.dialects.postgresql import ENUM, UUID, TEXT, VARCHAR
 from sqlalchemy.orm import relationship
 
 from .Base import Base
+
+
+class WorkspaceStatusEnum(Enum):
+    ACTIVE = "Active"
+    PLANNING = "Planning"
+    ON_HOLD = "On Hold"
+    COMPLETED = "Completed"
 
 
 class Workspace(Base):
@@ -12,7 +22,7 @@ class Workspace(Base):
     id = Column(UUID, primary_key=True, default=uuid.uuid4)
     name = Column(VARCHAR(225), nullable=False)
     description = Column(TEXT)
-    status = Column(VARCHAR, nullable=False)
+    status = Column(ENUM(WorkspaceStatusEnum), nullable=False, default=WorkspaceStatusEnum.ACTIVE)
 
     # Foreign keys
     ownerId = Column(UUID, ForeignKey('user.id'))
