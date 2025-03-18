@@ -3,7 +3,6 @@
 Welcome to the **InSync Backend** repository! This guide will help you set up and run the backend environment for the
 project.
 
----
 
 ## 📌 Prerequisites
 
@@ -14,7 +13,6 @@ Ensure you have the following installed before proceeding:
 - [Virtual Environment](https://docs.python.org/3/library/venv.html)
 - [Git](https://git-scm.com/)
 
----
 
 ## 🚀 Setup Instructions
 
