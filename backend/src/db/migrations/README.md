@@ -2,8 +2,6 @@
 
 This document provides instructions used for running migrations for the backend project using **Alembic**.
 
----
-
 ### Generate a Migration Script
 
 ```sh
