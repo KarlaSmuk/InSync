@@ -1,8 +1,8 @@
-"""initial migration
+"""add user_workspace
 
-Revision ID: 332068768ff8
+Revision ID: 739a94d83762
 Revises: 
-Create Date: 2025-03-18 20:50:38.598607
+Create Date: 2025-03-18 21:28:55.917836
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '332068768ff8'
+revision: str = '739a94d83762'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,16 +26,18 @@ def upgrade() -> None:
     sa.Column('email', sa.VARCHAR(length=320), nullable=False),
     sa.Column('username', sa.VARCHAR(length=50), nullable=False),
     sa.Column('passwordHash', sa.VARCHAR(), nullable=False),
-    sa.Column('fullName', sa.VARCHAR(length=100), nullable=False),
+    sa.Column('fullName', sa.VARCHAR(length=225), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
     )
     op.create_table('workspace',
     sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('name', sa.VARCHAR(length=100), nullable=False),
+    sa.Column('name', sa.VARCHAR(length=225), nullable=False),
     sa.Column('description', sa.TEXT(), nullable=True),
     sa.Column('status', sa.VARCHAR(), nullable=False),
+    sa.Column('ownerId', sa.UUID(), nullable=True),
+    sa.ForeignKeyConstraint(['ownerId'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
