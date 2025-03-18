@@ -1,11 +1,8 @@
-import logging
 import os
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-logger = logging.getLogger(__name__)
+from sqlalchemy.orm import sessionmaker
 
 # Load environment variables from .env
 load_dotenv()
@@ -21,14 +18,14 @@ DBNAME = os.getenv("dbname")
 DATABASE_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
 
 # Create the SQLAlchemy engine
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, echo=True)  # echo set to True to see SQL logs
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-# Test the connection
-def db_connect():
+# For interaction with database
+def get_db():
+    db = SessionLocal()
     try:
-        with engine.connect() as connection:
-            logger.info("Connection successful!")
-            return connection
-    except Exception as e:
-        logger.error(f"Failed to connect: {e}")
+        yield db
+    finally:
+        db.close()
