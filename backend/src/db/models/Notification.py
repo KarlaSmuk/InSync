@@ -11,14 +11,14 @@ from .associations import recipient_notification
 
 
 class EventTypeEnum(Enum):
-    TASK_CREATED = "Task created"
-    TASK_UPDATED = "Task updated"
-    TASK_ASSIGNED = "Task assigned"
-    TASK_UNASSIGNED = "Task unassigned"
-    TASK_DELETED = "Task deleted"
-    TASK_STATUS_CHANGED = "Task status changed"
-    TASK_DUE_SOON = "Task due soon"
-    TASK_COMPLETED = "Task completed"
+    TASK_CREATED = "TASK_CREATED"
+    TASK_UPDATED = "TASK_UPDATED"
+    TASK_ASSIGNED = "TASK_ASSIGNED"
+    TASK_UNASSIGNED = "TASK_UNASSIGNED"
+    TASK_DELETED = "TASK_DELETED"
+    TASK_STATUS_CHANGED = "TASK_STATUS_CHANGED"
+    TASK_DUE_SOON = "TASK_DUE_SOON"
+    TASK_COMPLETED = "TASK_COMPLETED"
 
 
 class Notification(Base):

@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -19,6 +20,7 @@ class UserUpdate(UserBase):
 
 class UserResponse(UserBase):
     id: UUID
+    notifications: List[UUID]  # TODO
 
     class Config:
         from_attributes = True
