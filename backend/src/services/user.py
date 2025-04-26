@@ -32,7 +32,6 @@ class UserService:
         self.db.add(new_user)
         self.db.commit()
         self.db.refresh(new_user)
-        print(new_user)
         return new_user
 
     def get_user(self, user_id: UUID):

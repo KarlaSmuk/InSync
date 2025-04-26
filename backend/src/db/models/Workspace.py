@@ -9,10 +9,10 @@ from .Base import Base
 
 
 class WorkspaceStatusEnum(Enum):
-    ACTIVE = "Active"
-    PLANNING = "Planning"
-    ON_HOLD = "On Hold"
-    COMPLETED = "Completed"
+    ACTIVE = "ACTIVE"
+    PLANNING = "PLANNING"
+    ON_HOLD = "ON_HOLD"
+    COMPLETED = "COMPLETED"
 
 
 class Workspace(Base):

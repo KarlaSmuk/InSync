@@ -16,7 +16,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     user_service = UserService(db)
     try:
         new_user = user_service.create_user(user)
-        return UserResponse.model_validate(new_user)
+        return new_user
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
