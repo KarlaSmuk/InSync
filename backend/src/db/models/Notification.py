@@ -30,7 +30,7 @@ class Notification(Base):
     createdAt = Column(TIMESTAMP, default=func.now())
 
     # Foreign keys
-    taskId = Column(UUID(as_uuid=True), ForeignKey('task.id'))
+    taskId = Column(UUID(as_uuid=True), ForeignKey('task.id', ondelete='CASCADE'))
 
     # Relationship
     task = relationship("Task", back_populates="notifications")

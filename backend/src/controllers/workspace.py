@@ -32,3 +32,10 @@ def get_workspaces(user_id: UUID, db: Session = Depends(get_db)):
     workspace_service = WorkspaceService(db)
     workspaces = workspace_service.get_workspaces_by_user(user_id)
     return workspaces
+
+
+@router.delete("/", )
+def get_workspaces(workspace_id: UUID, db: Session = Depends(get_db)):
+    workspace_service = WorkspaceService(db)
+    workspaces = workspace_service.delete_workspace(workspace_id)
+    return workspaces

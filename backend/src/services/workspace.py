@@ -34,3 +34,9 @@ class WorkspaceService:
 
     def get_workspaces_by_user(self, user_id: UUID):
         return self.db.query(Workspace).filter(Workspace.ownerId == user_id).all()
+
+    def delete_workspace(self, workspace_id: UUID):
+        workspace = self.db.query(Workspace).filter(Workspace.id == workspace_id).first()
+        if workspace:
+            self.db.delete(workspace)
+            self.db.commit()

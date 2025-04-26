@@ -18,16 +18,18 @@ class User(Base):
     fullName = Column(VARCHAR(225), nullable=False)
 
     # relationships
-    workspaces = relationship("Workspace", back_populates="owner")
+    workspaces = relationship("Workspace", back_populates="owner", cascade="all, delete-orphan")
 
     assigned_tasks = relationship(
         "Task",
         secondary=assignee_task,
-        back_populates="assignees"
+        back_populates="assignees",
+        cascade="save-update, merge"  # cannot be deleted when user is deleted bc other users may be assigned to it
     )
 
     notifications = relationship(
         "Notification",
         secondary=recipient_notification,
-        back_populates="recipients"
+        back_populates="recipients",
+        cascade="save-update, merge"  # cannot be deleted when user is deleted bc other users may be assigned to it
     )

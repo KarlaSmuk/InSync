@@ -14,7 +14,7 @@ class WorkspaceTaskStatus(Base):
     name = Column(VARCHAR(225), nullable=False)
 
     # Foreign keys
-    workspaceId = Column(UUID, ForeignKey('workspace.id'))
+    workspaceId = Column(UUID, ForeignKey('workspace.id', ondelete='CASCADE'))
 
     # relationships
     workspace = relationship("Workspace", back_populates="taskStatuses")

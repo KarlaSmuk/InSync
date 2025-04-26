@@ -3,7 +3,6 @@
 Welcome to the **InSync Backend** repository! This guide will help you set up and run the backend environment for the
 project.
 
-
 ## 📌 Prerequisites
 
 Ensure you have the following installed before proceeding:
@@ -12,7 +11,6 @@ Ensure you have the following installed before proceeding:
 - [pip](https://pip.pypa.io/en/stable/) (comes with Python)
 - [Virtual Environment](https://docs.python.org/3/library/venv.html)
 - [Git](https://git-scm.com/)
-
 
 ## 🚀 Setup Instructions
 
@@ -64,6 +62,10 @@ alembic upgrade head
 
 ```sh
 fastapi dev main.py
+```
+
+```sh
+uvicorn main:app --reload
 ```
 
 #### Production Mode

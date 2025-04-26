@@ -17,13 +17,13 @@ class Task(Base):
     dueDate = Column(TIMESTAMP)
 
     # Foreign keys
-    workspaceId = Column(UUID, ForeignKey('workspace.id'))
+    workspaceId = Column(UUID, ForeignKey('workspace.id', ondelete='CASCADE'))
     statusId = Column(UUID, ForeignKey('workspaceTaskStatus.id'))
 
     # relationships
     workspace = relationship("Workspace", back_populates="tasks")
     status = relationship("WorkspaceTaskStatus", back_populates="tasks")
-    notifications = relationship("Notification", back_populates="task")
+    notifications = relationship("Notification", back_populates="task", cascade="all, delete-orphan")
 
     assignees = relationship(
         "User",

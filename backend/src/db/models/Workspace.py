@@ -24,9 +24,9 @@ class Workspace(Base):
     status = Column(ENUM(WorkspaceStatusEnum), nullable=False, default=WorkspaceStatusEnum.ACTIVE)
 
     # Foreign keys
-    ownerId = Column(UUID, ForeignKey('user.id'))
+    ownerId = Column(UUID, ForeignKey('user.id', ondelete='CASCADE'))
 
     # relationships
     owner = relationship("User", back_populates="workspaces")
-    tasks = relationship("Task", back_populates="workspace")
-    taskStatuses = relationship("WorkspaceTaskStatus", back_populates="workspace")
+    tasks = relationship("Task", back_populates="workspace", cascade="all, delete-orphan")
+    taskStatuses = relationship("WorkspaceTaskStatus", back_populates="workspace", cascade="all, delete-orphan")
