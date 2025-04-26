@@ -2,7 +2,6 @@ import uuid
 from enum import Enum
 
 from sqlalchemy import Column, ForeignKey
-# enum for postgres
 from sqlalchemy.dialects.postgresql import ENUM, UUID, TEXT, VARCHAR
 from sqlalchemy.orm import relationship
 
@@ -29,3 +28,5 @@ class Workspace(Base):
 
     # relationships
     owner = relationship("User", back_populates="workspaces")
+    tasks = relationship("Task", back_populates="workspace")
+    taskStatuses = relationship("WorkspaceTaskStatus", back_populates="workspace")

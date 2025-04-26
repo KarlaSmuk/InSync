@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID, VARCHAR
 from sqlalchemy.orm import relationship
 
 from .Base import Base
+from .associations import assignee_task, recipient_notification
 
 
 class User(Base):
@@ -18,3 +19,15 @@ class User(Base):
 
     # relationships
     workspaces = relationship("Workspace", back_populates="owner")
+
+    assigned_tasks = relationship(
+        "Task",
+        secondary=assignee_task,
+        back_populates="assignees"
+    )
+
+    notifications = relationship(
+        "Notification",
+        secondary=recipient_notification,
+        back_populates="recipients"
+    )
