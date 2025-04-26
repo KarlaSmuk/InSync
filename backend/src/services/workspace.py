@@ -33,4 +33,4 @@ class WorkspaceService:
         return self.db.query(Workspace).filter(Workspace.id == workspace_id).first()
 
     def get_workspaces_by_user(self, user_id: UUID):
-        return self.db.query(Workspace).filter(Workspace.id == user_id).all()
+        return self.db.query(Workspace).filter(Workspace.ownerId == user_id).all()
