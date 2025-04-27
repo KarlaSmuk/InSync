@@ -95,6 +95,10 @@ class TaskService:
         # Return the updated task
         return task
 
+    def get_task(self, task_id: UUID):
+        task = self.db.query(Task).filter(Task.id == task_id).first()
+        return task
+
     # notifications
     def create_notification(self, taskId: UUID, event_type: EventTypeEnum, message: str) -> Notification:
         # Create the notification

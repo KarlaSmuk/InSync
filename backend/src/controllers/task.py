@@ -52,3 +52,22 @@ async def update_task(task_id: UUID, task_update: TaskUpdate, db: Session = Depe
         raise HTTPException(status_code=400, detail=str(e))
 
     return task
+
+
+@router.get("/{task_id}", response_model=TaskResponse)
+async def get_task(task_id: UUID, db: Session = Depends(get_db)):
+    task_service = TaskService(db)
+
+    task = task_service.get_task(task_id)
+    if task is None:
+        HTTPException(status_code=404, detail="Task not found")
+
+    return TaskResponse(
+        id=task.id,
+        title=task.title,
+        description=task.description,
+        dueDate=task.dueDate,
+        workspaceId=task.workspaceId,
+        statusId=task.statusId,
+        assignees=[assignee.assigneeId for assignee in task.assignees]
+    )
