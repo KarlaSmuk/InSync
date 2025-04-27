@@ -16,7 +16,7 @@ async def create_task(task_create: TaskCreate, db: Session = Depends(get_db)):
     task_service = TaskService(db)
 
     try:
-        new_task = task_service.create_task(task_create)
+        new_task = await task_service.create_task(task_create)
         if isinstance(new_task, str):
             raise HTTPException(status_code=404, detail=str)
     except ValueError as e:
@@ -46,7 +46,7 @@ async def update_task(task_id: UUID, task_update: TaskUpdate, db: Session = Depe
     task_service = TaskService(db)
 
     try:
-        task = task_service.update_task(task_id, task_update)
+        task = await task_service.update_task(task_id, task_update)
         if task is None:
             HTTPException(status_code=404, detail="Task not found")
     except ValueError as e:
@@ -56,7 +56,7 @@ async def update_task(task_id: UUID, task_update: TaskUpdate, db: Session = Depe
 
 
 @router.get("/{task_id}", response_model=TaskResponse)
-async def get_task(task_id: UUID, db: Session = Depends(get_db)):
+def get_task(task_id: UUID, db: Session = Depends(get_db)):
     task_service = TaskService(db)
 
     task, assignees = task_service.get_task(task_id)
@@ -75,7 +75,7 @@ async def get_task(task_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.get("/{task_id}/status", response_model=WorkspaceStatusResponse)
-async def get_task_status(task_id: UUID, db: Session = Depends(get_db)):
+def get_task_status(task_id: UUID, db: Session = Depends(get_db)):
     task_service = TaskService(db)
 
     status = task_service.get_task_status(task_id)

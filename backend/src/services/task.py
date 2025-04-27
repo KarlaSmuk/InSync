@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from db.models import Task, Notification, User, RecipientNotification, AssigneeTask, WorkspaceTaskStatus
 from schemas.task import TaskCreate, TaskUpdate, EventTypeEnum
+from websocket import notification_manager
 
 
 class TaskService:
@@ -13,7 +14,7 @@ class TaskService:
         self.db = db
 
     # tasks
-    def create_task(self, task_create: TaskCreate):
+    async def create_task(self, task_create: TaskCreate):
         # Create a task
         task = Task(
             title=task_create.title,
@@ -34,63 +35,63 @@ class TaskService:
         self.db.commit()
         self.db.refresh(task)
 
+        await notification_manager.notify_users(task.id, EventTypeEnum.TASK_CREATED,
+                                                [assignee.assigneeId for assignee in task.assignees])
+
         return task
 
-    def update_task(self, task_id: UUID, update_data: TaskUpdate):
+    async def update_task(self, task_id: UUID, update_data: TaskUpdate):
         # Fetch the task from the database
         task = self.db.query(Task).filter(Task.id == task_id).first()
         if not task:
             return None
 
         # Initialize the list of notifications
-        notifications = []
+        notification = None
 
         # Track changes and events
         if update_data.title is not None and update_data.title != task.title:
             task.title = update_data.title
-            notifications.append(self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task title updated"))
+            notification = self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task title updated")
 
         if update_data.description is not None and update_data.description != task.description:
             task.description = update_data.description
-            notifications.append(
-                self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task description updated"))
+            notification = self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task description updated")
 
         if update_data.dueDate is not None and update_data.dueDate != task.due_date:
             task.due_date = update_data.dueDate
-            notifications.append(
-                self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task due date updated"))
+            notification = self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task due date updated")
 
         if update_data.workspaceId is not None and update_data.workspaceId != task.workspace_id:
             task.workspace_id = update_data.workspaceId
-            notifications.append(
-                self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task workspace updated"))
+            notification = self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task workspace updated")
 
         if update_data.statusId is not None and update_data.statusId != task.status_id:
             task.status_id = update_data.statusId
-            notifications.append(
-                self.create_notification(task_id, EventTypeEnum.TASK_STATUS_CHANGED, "Task status changed"))
+            notification = self.create_notification(task_id, EventTypeEnum.TASK_STATUS_CHANGED, "Task status changed")
 
         # Check if assignee is being added or removed
         if update_data.assignee is not None:
             if update_data.assignee != task.assignee:
                 # Unassign the current assignee, if any
                 if task.assignee is not None:
-                    notifications.append(
-                        self.create_notification(task_id, EventTypeEnum.TASK_UNASSIGNED, "Task unassigned"))
+                    notification = self.create_notification(task_id, EventTypeEnum.TASK_UNASSIGNED, "Task unassigned")
 
                 # Assign the new assignee
                 task.assignee = update_data.assignee
-                notifications.append(self.create_notification(task_id, EventTypeEnum.TASK_ASSIGNED, "Task assigned"))
+                notification = self.create_notification(task_id, EventTypeEnum.TASK_ASSIGNED, "Task assigned")
 
         # Commit the changes to the database
         self.db.commit()
         self.db.refresh(task)
 
         # Create notifications for each change
-        for notification in notifications:
+        if notification is not None:
             self.db.add(notification)
+            self.db.commit()
 
-        self.db.commit()
+        await notification_manager.notify_users(task.id, notification.eventType,
+                                                [assignee.assigneeId for assignee in task.assignees])
 
         # Return the updated task
         return task
