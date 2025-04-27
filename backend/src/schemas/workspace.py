@@ -31,3 +31,11 @@ class WorkspaceResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class WorkspaceStatusResponse(BaseModel):
+    id: UUID
+    name: str
+
+    class Config:
+        from_attributes = True

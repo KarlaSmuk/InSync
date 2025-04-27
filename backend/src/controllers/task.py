@@ -4,13 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from db.db import get_db
-from schemas.task import TaskCreate, TaskResponse, EventTypeEnum, TaskUpdate
+from schemas.task import TaskCreate, TaskResponse, EventTypeEnum, TaskUpdate, TaskCreateResponse
+from schemas.workspace import WorkspaceStatusResponse
 from services.task import TaskService
 
 router = APIRouter(prefix="/api/task", tags=["task"])
 
 
-@router.post("/", response_model=TaskResponse)
+@router.post("/", response_model=TaskCreateResponse)
 async def create_task(task_create: TaskCreate, db: Session = Depends(get_db)):
     task_service = TaskService(db)
 
@@ -29,18 +30,18 @@ async def create_task(task_create: TaskCreate, db: Session = Depends(get_db)):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    return TaskResponse(
+    return TaskCreateResponse(
         id=new_task.id,
         title=new_task.title,
         description=new_task.description,
         dueDate=new_task.dueDate,
         workspaceId=new_task.workspaceId,
         statusId=new_task.statusId,
-        assignees=[assignee.assigneeId for assignee in new_task.assignees]  # Extract assigneeId as UUID
+        assigneesIds=[assignee.assigneeId for assignee in new_task.assignees]  # Extract assigneeId as UUID
     )
 
 
-@router.put("/{task_id}", response_model=TaskResponse)
+@router.put("/{task_id}", response_model=TaskCreateResponse)
 async def update_task(task_id: UUID, task_update: TaskUpdate, db: Session = Depends(get_db)):
     task_service = TaskService(db)
 
@@ -58,7 +59,7 @@ async def update_task(task_id: UUID, task_update: TaskUpdate, db: Session = Depe
 async def get_task(task_id: UUID, db: Session = Depends(get_db)):
     task_service = TaskService(db)
 
-    task = task_service.get_task(task_id)
+    task, assignees = task_service.get_task(task_id)
     if task is None:
         HTTPException(status_code=404, detail="Task not found")
 
@@ -68,6 +69,15 @@ async def get_task(task_id: UUID, db: Session = Depends(get_db)):
         description=task.description,
         dueDate=task.dueDate,
         workspaceId=task.workspaceId,
-        statusId=task.statusId,
-        assignees=[assignee.assigneeId for assignee in task.assignees]
+        status=task.status,
+        assignees=assignees
     )
+
+
+@router.get("/{task_id}/status", response_model=WorkspaceStatusResponse)
+async def get_task_status(task_id: UUID, db: Session = Depends(get_db)):
+    task_service = TaskService(db)
+
+    status = task_service.get_task_status(task_id)
+
+    return status

@@ -5,6 +5,9 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from schemas.user import UserResponse
+from schemas.workspace import WorkspaceStatusResponse
+
 
 class TaskCreate(BaseModel):
     title: str
@@ -24,14 +27,27 @@ class TaskUpdate(BaseModel):
     assignee: Optional[UUID] = None
 
 
-class TaskResponse(BaseModel):
+class TaskCreateResponse(BaseModel):
     id: UUID
     title: str
     description: Optional[str]
     dueDate: Optional[date]
     workspaceId: UUID
     statusId: UUID
-    assignees: List[UUID]
+    assigneesIds: List[UUID]
+
+    class Config:
+        from_attributes = True
+
+
+class TaskResponse(BaseModel):
+    id: UUID
+    title: str
+    description: Optional[str]
+    dueDate: Optional[date]
+    workspaceId: UUID
+    status: WorkspaceStatusResponse
+    assignees: List[UserResponse]
 
     class Config:
         from_attributes = True

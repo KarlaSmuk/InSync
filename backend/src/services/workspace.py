@@ -40,3 +40,7 @@ class WorkspaceService:
         if workspace:
             self.db.delete(workspace)
             self.db.commit()
+
+    def get_workspace_statuses(self, workspace_id: UUID):
+        workspace = self.db.query(Workspace).filter(Workspace.id == workspace_id).first()
+        return workspace.taskStatuses

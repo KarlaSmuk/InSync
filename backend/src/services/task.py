@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from db.models import Task, Notification, User, RecipientNotification, AssigneeTask
+from db.models import Task, Notification, User, RecipientNotification, AssigneeTask, WorkspaceTaskStatus
 from schemas.task import TaskCreate, TaskUpdate, EventTypeEnum
 
 
@@ -97,7 +97,14 @@ class TaskService:
 
     def get_task(self, task_id: UUID):
         task = self.db.query(Task).filter(Task.id == task_id).first()
-        return task
+        assignees = self.db.query(User).join(AssigneeTask).filter(AssigneeTask.taskId == task_id).all()
+
+        return task, assignees
+
+    def get_task_status(self, task_id: UUID):
+        task = self.db.query(Task).filter(Task.id == task_id).first()
+        status = self.db.query(WorkspaceTaskStatus).filter(WorkspaceTaskStatus.id == task.statusId)
+        return status
 
     # notifications
     def create_notification(self, taskId: UUID, event_type: EventTypeEnum, message: str) -> Notification:
