@@ -1,7 +1,7 @@
 import uuid
 
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, TEXT, VARCHAR, TIMESTAMP
+from sqlalchemy.dialects.postgresql import UUID, TEXT, VARCHAR, DATE
 from sqlalchemy.orm import relationship
 
 from .Base import Base
@@ -14,7 +14,7 @@ class Task(Base):
     id = Column(UUID, primary_key=True, default=uuid.uuid4)
     title = Column(VARCHAR(225), nullable=False)
     description = Column(TEXT)
-    dueDate = Column(TIMESTAMP)
+    dueDate = Column(DATE)
 
     # Foreign keys
     workspaceId = Column(UUID, ForeignKey('workspace.id', ondelete='CASCADE'))

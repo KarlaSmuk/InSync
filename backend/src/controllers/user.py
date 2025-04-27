@@ -11,7 +11,7 @@ from services.user import UserService
 router = APIRouter(prefix="/api/user", tags=["user"])
 
 
-@router.post("", response_model=UserResponse)
+@router.post("/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     user_service = UserService(db)
     try:
