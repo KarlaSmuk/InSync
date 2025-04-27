@@ -12,7 +12,8 @@
 <div id="messages"></div>
 
 <script>
-    const userId = "177b3f8d-5dc9-428a-94ce-239beed75148";
+    const pathParts = window.location.pathname.split("/");
+    const userId = pathParts[pathParts.length - 1];
 
     const socket = new WebSocket(`ws://localhost:8000/ws/${userId}`);
 
