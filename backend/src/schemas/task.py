@@ -74,13 +74,3 @@ class NotificationResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-class RecipientNotification(BaseModel):
-    recipientId: UUID
-    notificationId: UUID
-    isRead: bool
-    notifiedAt: datetime
-
-    class Config:
-        from_attributes = True

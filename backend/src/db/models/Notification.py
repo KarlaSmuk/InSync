@@ -7,7 +7,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from .Base import Base
-from .associations import recipient_notification
 
 
 class EventTypeEnum(Enum):
@@ -34,9 +33,4 @@ class Notification(Base):
 
     # Relationship
     task = relationship("Task", back_populates="notifications")
-
-    recipients = relationship(
-        "User",
-        secondary=recipient_notification,
-        back_populates="notifications"
-    )
+    recipients = relationship("RecipientNotification", back_populates="notification")

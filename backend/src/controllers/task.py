@@ -22,11 +22,22 @@ async def create_task(task_create: TaskCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
     try:
-        task_service.create_notification(new_task.id, EventTypeEnum.TASK_CREATED, f"Task '{new_task.title}' created.")
+        notification = task_service.create_notification(new_task.id, EventTypeEnum.TASK_CREATED,
+                                                        f"Task '{new_task.title}' created.")
+        if isinstance(notification, str):
+            raise HTTPException(status_code=404, detail=str)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    return new_task
+    return TaskResponse(
+        id=new_task.id,
+        title=new_task.title,
+        description=new_task.description,
+        dueDate=new_task.dueDate,
+        workspaceId=new_task.workspaceId,
+        statusId=new_task.statusId,
+        assignees=[assignee.assigneeId for assignee in new_task.assignees]  # Extract assigneeId as UUID
+    )
 
 
 @router.put("/{task_id}", response_model=TaskResponse)

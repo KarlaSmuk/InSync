@@ -5,7 +5,6 @@ from sqlalchemy.dialects.postgresql import UUID, VARCHAR
 from sqlalchemy.orm import relationship
 
 from .Base import Base
-from .associations import assignee_task, recipient_notification
 
 
 class User(Base):
@@ -19,17 +18,5 @@ class User(Base):
 
     # relationships
     workspaces = relationship("Workspace", back_populates="owner", cascade="all, delete-orphan")
-
-    assigned_tasks = relationship(
-        "Task",
-        secondary=assignee_task,
-        back_populates="assignees",
-        cascade="save-update, merge"  # cannot be deleted when user is deleted bc other users may be assigned to it
-    )
-
-    notifications = relationship(
-        "Notification",
-        secondary=recipient_notification,
-        back_populates="recipients",
-        cascade="save-update, merge"  # cannot be deleted when user is deleted bc other users may be assigned to it
-    )
+    assigned_tasks = relationship("AssigneeTask", back_populates="assignee")
+    notifications = relationship("RecipientNotification", back_populates="recipient")

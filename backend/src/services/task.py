@@ -1,11 +1,11 @@
-from datetime import datetime
 from typing import List
 from uuid import UUID
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from db.models import Task, Notification, User
-from schemas.task import TaskCreate, RecipientNotification, TaskUpdate, EventTypeEnum
+from db.models import Task, Notification, User, RecipientNotification, AssigneeTask
+from schemas.task import TaskCreate, TaskUpdate, EventTypeEnum
 
 
 class TaskService:
@@ -28,7 +28,7 @@ class TaskService:
             user = self.db.query(User).filter(User.id == assignee_id).first()
             if not user:
                 return f"User with id {assignee_id} not found"
-            task.assignees.append(user)
+            task.assignees.append(AssigneeTask(assigneeId=user.id, taskId=task.id))
 
         self.db.add(task)
         self.db.commit()
@@ -108,25 +108,30 @@ class TaskService:
         self.db.commit()
         self.db.refresh(notification)
 
+        # Assign recipients to notification
+        task = self.db.query(Task).filter(Task.id == taskId).first()
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+
+        assignee_ids = [assignee.assigneeId for assignee in task.assignees]
+        if not assignee_ids:
+            raise HTTPException(status_code=404, detail="No assignees found for this task")
+
+        # Assign assignees to task
+        self.assign_notification_to_users(notification.id, assignee_ids)
+
         return notification
 
     def assign_notification_to_users(self, notification_id: UUID, recipient_ids: List[UUID]):
-        # Retrieve the notification by ID
-        notification = self.db.query(Notification).filter(Notification.id == notification_id).first()
-        if not notification:
-            return None
 
-        # Iterate over the list of recipient IDs and assign the notification to each user
         for recipient_id in recipient_ids:
             recipient_notification = RecipientNotification(
                 recipientId=recipient_id,
                 notificationId=notification_id,
-                isRead=False,  # Initially, the notification is not read
-                notifiedAt=datetime.now()
+                isRead=False
             )
             self.db.add(recipient_notification)
 
-        # Commit all the changes to the database
         self.db.commit()
 
         return "Notification successfully assigned to users"
