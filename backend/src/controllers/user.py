@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from db.db import get_db  # Make sure to import your database session
-from schemas.user import UserCreate, UserUpdate, UserResponse
+from schemas.user import UserCreate, UserUpdate, UserResponse, UserNotificationResponse
 from services.user import UserService
 
 router = APIRouter(prefix="/api/user", tags=["user"])
@@ -53,3 +53,12 @@ def delete_user(user_id: UUID, db: Session = Depends(get_db)):
     if not deleted_user:
         raise HTTPException(status_code=404, detail="User not found")
     return deleted_user
+
+
+@router.get("/{user_id}/notifications", response_model=List[UserNotificationResponse])
+def get_user_notifications(user_id: UUID, db: Session = Depends(get_db)):
+    user_service = UserService(db)
+    notifications = user_service.get_user_notifications(user_id)
+    if not notifications:
+        raise HTTPException(status_code=404, detail="User not found")
+    return notifications

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from db.models import User
+from db.models import User, Notification, RecipientNotification
 from schemas.user import UserCreate, UserUpdate
 from utils.auth import get_password_hash
 
@@ -65,3 +65,9 @@ class UserService:
         self.db.delete(user)
         self.db.commit()
         return user
+
+    def get_user_notifications(self, user_id: UUID):
+        notifications = self.db.query(Notification).join(RecipientNotification).filter(
+            RecipientNotification.recipientId == user_id).all()
+
+        return notifications
