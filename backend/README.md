@@ -1,6 +1,6 @@
 # InSync Backend
 
-Welcome to the **InSync Backend** repository! This guide will help you set up and run the backend environment for the
+Welcome to the **InSync Backend**! This guide will help you set up and run the backend environment for the
 project.
 
 ## 📌 Prerequisites
