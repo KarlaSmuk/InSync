@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from db.db import get_db
 from schemas.workspace import WorkspaceCreate, WorkspaceResponse, WorkspaceStatusResponse
 from services.workspace import WorkspaceService
+from utils.auth import get_current_user
 
 router = APIRouter(prefix="/api/workspace", tags=["workspace"])
 
@@ -18,6 +19,13 @@ def create_workspace(workspace: WorkspaceCreate, db: Session = Depends(get_db)):
     return new_workspace
 
 
+@router.get("/user", response_model=List[WorkspaceResponse])
+def get_workspace_by_user(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    workspace_service = WorkspaceService(db)
+    workspaces = workspace_service.get_workspaces_by_user(current_user.id)
+    return workspaces
+
+
 @router.get("/{workspace_id}", response_model=WorkspaceResponse)
 def get_workspace_by_id(workspace_id: UUID, db: Session = Depends(get_db)):
     workspace_service = WorkspaceService(db)
@@ -25,13 +33,6 @@ def get_workspace_by_id(workspace_id: UUID, db: Session = Depends(get_db)):
     if not workspace:
         raise HTTPException(status_code=404, detail="Workspace not found")
     return workspace
-
-
-@router.get("/user/{user_id}", response_model=List[WorkspaceResponse])
-def get_workspace_by_user(user_id: UUID, db: Session = Depends(get_db)):
-    workspace_service = WorkspaceService(db)
-    workspaces = workspace_service.get_workspaces_by_user(user_id)
-    return workspaces
 
 
 @router.delete("/", )
