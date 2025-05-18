@@ -1,24 +1,36 @@
 import { useState } from "react";
 import { Container, Typography, Tabs, Tab, Paper } from "@mui/material";
 import AuthForm from "../components/AuthForm";
+import { getAuth } from "../api/auth/auth";
+import type { LoginRequest, UserCreate } from "../api/fastAPI.schemas";
 
 function LandingPage() {
   const [tab, setTab] = useState(0);
+  const { registerUserApiAuthRegisterPost, loginApiAuthLoginPost } = getAuth();
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
   };
 
-  const handleAuthSubmit = (
-    formData: {
-      email: string;
-      password: string;
-      username?: string;
-    },
+  const handleAuthSubmit = async (
+    data: LoginRequest | UserCreate,
     mode: "login" | "register"
   ) => {
-    console.log(mode);
-    console.log("Submit:", formData);
+    try {
+      if (mode === "login") {
+        const response = await loginApiAuthLoginPost(data as LoginRequest);
+        console.log(response);
+        const { accessToken } = response.data;
+        console.log("Logged in! Token:", accessToken);
+      } else {
+        const response = await registerUserApiAuthRegisterPost(
+          data as UserCreate
+        );
+        console.log("User registered:", response.data);
+      }
+    } catch (error) {
+      console.error("Auth failed:", error);
+    }
   };
 
   return (
@@ -36,7 +48,7 @@ function LandingPage() {
         elevation={4}
         sx={{
           width: "500px",
-          height: "505px",
+          height: "580px",
           p: 4,
           borderRadius: 2,
           border: "1px solid",

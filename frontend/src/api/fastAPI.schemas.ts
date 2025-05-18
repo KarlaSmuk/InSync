@@ -23,6 +23,11 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
 export interface NotificationTaskResponse {
   id: string;
   title: string;
@@ -169,11 +174,6 @@ export interface WorkspaceStatusResponse {
   id: string;
   name: string;
 }
-
-export type LoginApiAuthLoginPostParams = {
-username: string;
-password: string;
-};
 
 export type DeleteWorkspaceApiWorkspaceDeleteParams = {
 workspace_id: string;

@@ -11,7 +11,7 @@ import type {
 } from 'axios';
 
 import type {
-  LoginApiAuthLoginPostParams,
+  LoginRequest,
   TokenResponse,
   UserCreate,
   UserResponse
@@ -36,12 +36,11 @@ const registerUserApiAuthRegisterPost = <TData = AxiosResponse<UserResponse>>(
  * @summary Login
  */
 const loginApiAuthLoginPost = <TData = AxiosResponse<TokenResponse>>(
-    params: LoginApiAuthLoginPostParams, options?: AxiosRequestConfig
+    loginRequest: LoginRequest, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.post(
-      `/api/auth/login`,undefined,{
-    ...options,
-        params: {...params, ...options?.params},}
+      `/api/auth/login`,
+      loginRequest,options
     );
   }
 return {registerUserApiAuthRegisterPost,loginApiAuthLoginPost}};
