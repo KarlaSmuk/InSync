@@ -4,31 +4,37 @@ import { TextField, Button, Stack, Container } from "@mui/material";
 
 type AuthFormProps = {
   mode: "login" | "register";
-  onSubmit: (formData: {
-    email: string;
-    password: string;
-    username?: string;
-  }) => void;
+  onSubmit: (
+    formData: {
+      email: string;
+      password: string;
+      username?: string;
+    },
+    mode: "login" | "register"
+  ) => void;
 };
 
 export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(""); //for login it can be email or username
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent, mode: "login" | "register") => {
     e.preventDefault();
-    onSubmit({
-      email,
-      password,
-      username: mode === "register" ? username : undefined,
-    });
+    onSubmit(
+      {
+        email,
+        password,
+        username: mode === "register" ? username : undefined,
+      },
+      mode
+    );
   };
 
   return (
     <Container
       component="form"
-      onSubmit={handleSubmit}
+      onSubmit={(e) => handleSubmit(e, mode)}
       noValidate
       sx={{
         height: "260px",

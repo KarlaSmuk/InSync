@@ -9,11 +9,15 @@ function LandingPage() {
     setTab(newValue);
   };
 
-  const handleAuthSubmit = (formData: {
-    email: string;
-    password: string;
-    username?: string;
-  }) => {
+  const handleAuthSubmit = (
+    formData: {
+      email: string;
+      password: string;
+      username?: string;
+    },
+    mode: "login" | "register"
+  ) => {
+    console.log(mode);
     console.log("Submit:", formData);
   };
 

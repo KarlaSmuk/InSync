@@ -34,6 +34,12 @@ cd src
 pnpm run dev
 ```
 
+### Generate API From OpenApi schema
+
+```sh
+pnpm orval
+```
+
 ## 📦 Build for Production
 
 To create an optimized production build, run:
