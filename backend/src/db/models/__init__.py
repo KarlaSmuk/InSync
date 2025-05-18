@@ -6,3 +6,4 @@ from .Task import Task
 from .User import User
 from .Workspace import Workspace
 from .WorkspaceTaskStatus import WorkspaceTaskStatus
+from .WorkspaceUser import WorkspaceUser

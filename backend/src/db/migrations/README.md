@@ -14,8 +14,8 @@ alembic revision --autogenerate -m "description of changes"
 alembic upgrade head
 ```
 
-### Downgrade Migrations
+### Downgrade Last Migration
 
 ```sh
-alembic downgrade <migration_id>
+alembic downgrade -1
 ```

@@ -1,7 +1,7 @@
 import uuid
 from enum import Enum
 
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import ENUM, UUID, TEXT, VARCHAR
 from sqlalchemy.orm import relationship
 
@@ -23,10 +23,8 @@ class Workspace(Base):
     description = Column(TEXT)
     status = Column(ENUM(WorkspaceStatusEnum), nullable=False, default=WorkspaceStatusEnum.ACTIVE)
 
-    # Foreign keys
-    ownerId = Column(UUID, ForeignKey('user.id', ondelete='CASCADE'))
-
     # relationships
     owner = relationship("User", back_populates="workspaces")
     tasks = relationship("Task", back_populates="workspace", cascade="all, delete-orphan")
     taskStatuses = relationship("WorkspaceTaskStatus", back_populates="workspace", cascade="all, delete-orphan")
+    memberships = relationship("WorkspaceUser", back_populates="workspace", cascade="all, delete-orphan")
