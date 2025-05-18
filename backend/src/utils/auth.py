@@ -5,6 +5,7 @@ from uuid import UUID
 
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, Request
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError
 from jose import jwt
 from passlib.context import CryptContext
@@ -15,6 +16,7 @@ from db.models import User
 
 load_dotenv()
 
+security = HTTPBearer()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -45,10 +47,9 @@ def get_token_from_header(request: Request) -> str:
     return auth_header.split(" ")[1]
 
 
-def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
-    token = get_token_from_header(request)
-    print(f"token: {token}")
-    print(f"SECRET_KEY: {SECRET_KEY}")
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security),
+                     db: Session = Depends(get_db)) -> User:
+    token = credentials.credentials
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = UUID(payload.get("sub"))

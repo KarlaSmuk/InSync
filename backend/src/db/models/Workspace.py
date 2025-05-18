@@ -24,7 +24,6 @@ class Workspace(Base):
     status = Column(ENUM(WorkspaceStatusEnum), nullable=False, default=WorkspaceStatusEnum.ACTIVE)
 
     # relationships
-    owner = relationship("User", back_populates="workspaces")
     tasks = relationship("Task", back_populates="workspace", cascade="all, delete-orphan")
     taskStatuses = relationship("WorkspaceTaskStatus", back_populates="workspace", cascade="all, delete-orphan")
     memberships = relationship("WorkspaceUser", back_populates="workspace", cascade="all, delete-orphan")

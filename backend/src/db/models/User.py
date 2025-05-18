@@ -17,7 +17,6 @@ class User(Base):
     fullName = Column(VARCHAR(225), nullable=False)
 
     # relationships
-    workspaces = relationship("Workspace", back_populates="owner", cascade="all, delete-orphan")
     assigned_tasks = relationship("AssigneeTask", back_populates="assignee")
     notifications = relationship("RecipientNotification", back_populates="recipient")
     workspace_memberships = relationship("WorkspaceUser", back_populates="user")

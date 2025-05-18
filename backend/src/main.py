@@ -2,7 +2,6 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 
 from controllers.auth import router as auth_router
 from controllers.task import router as task_router
@@ -17,7 +16,8 @@ app.include_router(workspace_router)
 app.include_router(task_router)
 app.include_router(websocket_router)
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/test-websocket/{userId}", response_class=HTMLResponse)

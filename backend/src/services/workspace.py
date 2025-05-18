@@ -1,8 +1,9 @@
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from db.models import Workspace
+from db.models import Workspace, WorkspaceUser, User
 from schemas.workspace import WorkspaceCreate
 from services.workspaceTaskStatus import WorkspaceTaskStatusService
 
@@ -11,17 +12,24 @@ class WorkspaceService:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_workspace(self, workspace: WorkspaceCreate):
+    def create_workspace(self, workspace: WorkspaceCreate, userId: UUID):
         new_workspace = Workspace(
             name=workspace.name,
             description=workspace.description,
-            status=workspace.status,
-            ownerId=workspace.ownerId
+            status=workspace.status
         )
 
         self.db.add(new_workspace)
         self.db.commit()
         self.db.refresh(new_workspace)
+
+        # Add a creator as a member in workspace_user
+        workspace_user = WorkspaceUser(
+            workspaceId=new_workspace.id,
+            userId=userId
+        )
+        self.db.add(workspace_user)
+        self.db.commit()
 
         # when creating workspace create 3 default workspace task statuses
         workspace_task_status_service = WorkspaceTaskStatusService(self.db)
@@ -29,11 +37,26 @@ class WorkspaceService:
 
         return new_workspace
 
+    def add_members(self, userIds: list, workspaceId: UUID):
+        for userId in userIds:
+            workspace_user = WorkspaceUser(
+                workspaceId=workspaceId,
+                userId=userId
+            )
+            self.db.add(workspace_user)
+        self.db.commit()
+        return self.get_workspace_by_id(workspaceId)
+
     def get_workspace_by_id(self, workspace_id: UUID):
         return self.db.query(Workspace).filter(Workspace.id == workspace_id).first()
 
     def get_workspaces_by_user(self, user_id: UUID):
-        return self.db.query(Workspace).filter(Workspace.ownerId == user_id).all()
+        return (
+            self.db.query(Workspace)
+            .join(WorkspaceUser)
+            .filter(WorkspaceUser.userId == user_id)
+            .all()
+        )
 
     def delete_workspace(self, workspace_id: UUID):
         workspace = self.db.query(Workspace).filter(Workspace.id == workspace_id).first()
@@ -44,3 +67,14 @@ class WorkspaceService:
     def get_workspace_statuses(self, workspace_id: UUID):
         workspace = self.db.query(Workspace).filter(Workspace.id == workspace_id).first()
         return workspace.taskStatuses
+
+    def get_workspace_members(self, workspace_id: UUID):
+        user_ids_subquery = (
+            select(WorkspaceUser.userId)
+            .where(WorkspaceUser.workspaceId == workspace_id)
+        )
+
+        # Query all users in a single query
+        members = self.db.query(User).filter(User.id.in_(user_ids_subquery)).all()
+
+        return members
