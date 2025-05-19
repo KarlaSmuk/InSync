@@ -4,12 +4,6 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import * as axios from 'axios';
-import type {
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   LoginRequest,
   TokenResponse,
@@ -17,32 +11,39 @@ import type {
   UserResponse
 } from '../fastAPI.schemas';
 
+import { customInstance } from '../../utils/customAxios';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
   export const getAuth = () => {
 /**
  * @summary Register User
  */
-const registerUserApiAuthRegisterPost = <TData = AxiosResponse<UserResponse>>(
-    userCreate: UserCreate, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.post(
-      `/api/auth/register`,
-      userCreate,options
-    );
-  }
-/**
+const registerUserApiAuthRegisterPost = (
+    userCreate: UserCreate,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<UserResponse>(
+      {url: `/api/auth/register`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: userCreate
+    },
+      options);
+    }
+  /**
  * @summary Login
  */
-const loginApiAuthLoginPost = <TData = AxiosResponse<TokenResponse>>(
-    loginRequest: LoginRequest, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.post(
-      `/api/auth/login`,
-      loginRequest,options
-    );
-  }
-return {registerUserApiAuthRegisterPost,loginApiAuthLoginPost}};
-export type RegisterUserApiAuthRegisterPostResult = AxiosResponse<UserResponse>
-export type LoginApiAuthLoginPostResult = AxiosResponse<TokenResponse>
+const loginApiAuthLoginPost = (
+    loginRequest: LoginRequest,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<TokenResponse>(
+      {url: `/api/auth/login`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: loginRequest
+    },
+      options);
+    }
+  return {registerUserApiAuthRegisterPost,loginApiAuthLoginPost}};
+export type RegisterUserApiAuthRegisterPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuth>['registerUserApiAuthRegisterPost']>>>
+export type LoginApiAuthLoginPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuth>['loginApiAuthLoginPost']>>>

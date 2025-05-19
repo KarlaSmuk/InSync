@@ -19,14 +19,13 @@ function LandingPage() {
     try {
       if (mode === "login") {
         const response = await loginApiAuthLoginPost(data as LoginRequest);
-        console.log(response);
-        const { accessToken } = response.data;
+        const accessToken = response.accessToken;
         console.log("Logged in! Token:", accessToken);
       } else {
         const response = await registerUserApiAuthRegisterPost(
           data as UserCreate
         );
-        console.log("User registered:", response.data);
+        console.log("User registered:", response);
       }
     } catch (error) {
       console.error("Auth failed:", error);

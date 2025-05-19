@@ -4,12 +4,6 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import * as axios from 'axios';
-import type {
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   TaskCreate,
   TaskCreateResponse,
@@ -18,55 +12,64 @@ import type {
   WorkspaceStatusResponse
 } from '../fastAPI.schemas';
 
+import { customInstance } from '../../utils/customAxios';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
   export const getTask = () => {
 /**
  * @summary Create Task
  */
-const createTaskApiTaskPost = <TData = AxiosResponse<TaskCreateResponse>>(
-    taskCreate: TaskCreate, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.post(
-      `/api/task/`,
-      taskCreate,options
-    );
-  }
-/**
+const createTaskApiTaskPost = (
+    taskCreate: TaskCreate,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<TaskCreateResponse>(
+      {url: `/api/task/`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: taskCreate
+    },
+      options);
+    }
+  /**
  * @summary Update Task
  */
-const updateTaskApiTaskTaskIdPut = <TData = AxiosResponse<TaskCreateResponse>>(
+const updateTaskApiTaskTaskIdPut = (
     taskId: string,
-    taskUpdate: TaskUpdate, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.put(
-      `/api/task/${taskId}`,
-      taskUpdate,options
-    );
-  }
-/**
+    taskUpdate: TaskUpdate,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<TaskCreateResponse>(
+      {url: `/api/task/${taskId}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: taskUpdate
+    },
+      options);
+    }
+  /**
  * @summary Get Task
  */
-const getTaskApiTaskTaskIdGet = <TData = AxiosResponse<TaskResponse>>(
-    taskId: string, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.get(
-      `/api/task/${taskId}`,options
-    );
-  }
-/**
+const getTaskApiTaskTaskIdGet = (
+    taskId: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<TaskResponse>(
+      {url: `/api/task/${taskId}`, method: 'GET'
+    },
+      options);
+    }
+  /**
  * @summary Get Task Status
  */
-const getTaskStatusApiTaskTaskIdStatusGet = <TData = AxiosResponse<WorkspaceStatusResponse>>(
-    taskId: string, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.get(
-      `/api/task/${taskId}/status`,options
-    );
-  }
-return {createTaskApiTaskPost,updateTaskApiTaskTaskIdPut,getTaskApiTaskTaskIdGet,getTaskStatusApiTaskTaskIdStatusGet}};
-export type CreateTaskApiTaskPostResult = AxiosResponse<TaskCreateResponse>
-export type UpdateTaskApiTaskTaskIdPutResult = AxiosResponse<TaskCreateResponse>
-export type GetTaskApiTaskTaskIdGetResult = AxiosResponse<TaskResponse>
-export type GetTaskStatusApiTaskTaskIdStatusGetResult = AxiosResponse<WorkspaceStatusResponse>
+const getTaskStatusApiTaskTaskIdStatusGet = (
+    taskId: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<WorkspaceStatusResponse>(
+      {url: `/api/task/${taskId}/status`, method: 'GET'
+    },
+      options);
+    }
+  return {createTaskApiTaskPost,updateTaskApiTaskTaskIdPut,getTaskApiTaskTaskIdGet,getTaskStatusApiTaskTaskIdStatusGet}};
+export type CreateTaskApiTaskPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['createTaskApiTaskPost']>>>
+export type UpdateTaskApiTaskTaskIdPutResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['updateTaskApiTaskTaskIdPut']>>>
+export type GetTaskApiTaskTaskIdGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['getTaskApiTaskTaskIdGet']>>>
+export type GetTaskStatusApiTaskTaskIdStatusGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['getTaskStatusApiTaskTaskIdStatusGet']>>>

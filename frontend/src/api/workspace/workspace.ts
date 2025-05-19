@@ -4,12 +4,6 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import * as axios from 'axios';
-import type {
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   DeleteWorkspaceApiWorkspaceDeleteParams,
   UserResponse,
@@ -19,89 +13,100 @@ import type {
   WorkspaceStatusResponse
 } from '../fastAPI.schemas';
 
+import { customInstance } from '../../utils/customAxios';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
   export const getWorkspace = () => {
 /**
  * @summary Create Workspace
  */
-const createWorkspaceApiWorkspacePost = <TData = AxiosResponse<WorkspaceResponse>>(
-    workspaceCreate: WorkspaceCreate, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.post(
-      `/api/workspace/`,
-      workspaceCreate,options
-    );
-  }
-/**
+const createWorkspaceApiWorkspacePost = (
+    workspaceCreate: WorkspaceCreate,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<WorkspaceResponse>(
+      {url: `/api/workspace/`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: workspaceCreate
+    },
+      options);
+    }
+  /**
  * @summary Delete Workspace
  */
-const deleteWorkspaceApiWorkspaceDelete = <TData = AxiosResponse<unknown>>(
-    params: DeleteWorkspaceApiWorkspaceDeleteParams, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.delete(
-      `/api/workspace/`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
-/**
+const deleteWorkspaceApiWorkspaceDelete = (
+    params: DeleteWorkspaceApiWorkspaceDeleteParams,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<unknown>(
+      {url: `/api/workspace/`, method: 'DELETE',
+        params
+    },
+      options);
+    }
+  /**
  * @summary Add Workspace Members
  */
-const addWorkspaceMembersApiWorkspaceMembersPost = <TData = AxiosResponse<WorkspaceResponse>>(
-    workspaceMembersCreate: WorkspaceMembersCreate, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.post(
-      `/api/workspace/members`,
-      workspaceMembersCreate,options
-    );
-  }
-/**
+const addWorkspaceMembersApiWorkspaceMembersPost = (
+    workspaceMembersCreate: WorkspaceMembersCreate,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<WorkspaceResponse>(
+      {url: `/api/workspace/members`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: workspaceMembersCreate
+    },
+      options);
+    }
+  /**
  * @summary Get Workspaces By User
  */
-const getWorkspacesByUserApiWorkspaceAllGet = <TData = AxiosResponse<WorkspaceResponse[]>>(
-     options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.get(
-      `/api/workspace/all`,options
-    );
-  }
-/**
+const getWorkspacesByUserApiWorkspaceAllGet = (
+    
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<WorkspaceResponse[]>(
+      {url: `/api/workspace/all`, method: 'GET'
+    },
+      options);
+    }
+  /**
  * @summary Get Workspace By Id
  */
-const getWorkspaceByIdApiWorkspaceWorkspaceIdGet = <TData = AxiosResponse<WorkspaceResponse>>(
-    workspaceId: string, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.get(
-      `/api/workspace/${workspaceId}`,options
-    );
-  }
-/**
+const getWorkspaceByIdApiWorkspaceWorkspaceIdGet = (
+    workspaceId: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<WorkspaceResponse>(
+      {url: `/api/workspace/${workspaceId}`, method: 'GET'
+    },
+      options);
+    }
+  /**
  * @summary Get Workspace Statuses
  */
-const getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet = <TData = AxiosResponse<WorkspaceStatusResponse[]>>(
-    workspaceId: string, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.get(
-      `/api/workspace/${workspaceId}/statuses`,options
-    );
-  }
-/**
+const getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet = (
+    workspaceId: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<WorkspaceStatusResponse[]>(
+      {url: `/api/workspace/${workspaceId}/statuses`, method: 'GET'
+    },
+      options);
+    }
+  /**
  * @summary Get Workspace Members
  */
-const getWorkspaceMembersApiWorkspaceWorkspaceIdMembersGet = <TData = AxiosResponse<UserResponse[]>>(
-    workspaceId: string, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.get(
-      `/api/workspace/${workspaceId}/members`,options
-    );
-  }
-return {createWorkspaceApiWorkspacePost,deleteWorkspaceApiWorkspaceDelete,addWorkspaceMembersApiWorkspaceMembersPost,getWorkspacesByUserApiWorkspaceAllGet,getWorkspaceByIdApiWorkspaceWorkspaceIdGet,getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet,getWorkspaceMembersApiWorkspaceWorkspaceIdMembersGet}};
-export type CreateWorkspaceApiWorkspacePostResult = AxiosResponse<WorkspaceResponse>
-export type DeleteWorkspaceApiWorkspaceDeleteResult = AxiosResponse<unknown>
-export type AddWorkspaceMembersApiWorkspaceMembersPostResult = AxiosResponse<WorkspaceResponse>
-export type GetWorkspacesByUserApiWorkspaceAllGetResult = AxiosResponse<WorkspaceResponse[]>
-export type GetWorkspaceByIdApiWorkspaceWorkspaceIdGetResult = AxiosResponse<WorkspaceResponse>
-export type GetWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGetResult = AxiosResponse<WorkspaceStatusResponse[]>
-export type GetWorkspaceMembersApiWorkspaceWorkspaceIdMembersGetResult = AxiosResponse<UserResponse[]>
+const getWorkspaceMembersApiWorkspaceWorkspaceIdMembersGet = (
+    workspaceId: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<UserResponse[]>(
+      {url: `/api/workspace/${workspaceId}/members`, method: 'GET'
+    },
+      options);
+    }
+  return {createWorkspaceApiWorkspacePost,deleteWorkspaceApiWorkspaceDelete,addWorkspaceMembersApiWorkspaceMembersPost,getWorkspacesByUserApiWorkspaceAllGet,getWorkspaceByIdApiWorkspaceWorkspaceIdGet,getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet,getWorkspaceMembersApiWorkspaceWorkspaceIdMembersGet}};
+export type CreateWorkspaceApiWorkspacePostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['createWorkspaceApiWorkspacePost']>>>
+export type DeleteWorkspaceApiWorkspaceDeleteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['deleteWorkspaceApiWorkspaceDelete']>>>
+export type AddWorkspaceMembersApiWorkspaceMembersPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['addWorkspaceMembersApiWorkspaceMembersPost']>>>
+export type GetWorkspacesByUserApiWorkspaceAllGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['getWorkspacesByUserApiWorkspaceAllGet']>>>
+export type GetWorkspaceByIdApiWorkspaceWorkspaceIdGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['getWorkspaceByIdApiWorkspaceWorkspaceIdGet']>>>
+export type GetWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet']>>>
+export type GetWorkspaceMembersApiWorkspaceWorkspaceIdMembersGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['getWorkspaceMembersApiWorkspaceWorkspaceIdMembersGet']>>>

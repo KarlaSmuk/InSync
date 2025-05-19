@@ -5,6 +5,12 @@ export default {
             mode: 'tags-split',
             target: './src/api/',
             client: 'axios',
+            override: {
+                mutator: {
+                    path: './src/utils/customAxios.ts',
+                    name: 'customInstance',
+                },
+            },
         },
     },
 };
