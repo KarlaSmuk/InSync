@@ -1,28 +1,25 @@
 // src/components/AuthForm.tsx
-import { useState } from "react";
-import { TextField, Button, Stack, Container } from "@mui/material";
-import type { LoginRequest, UserCreate } from "../api/fastAPI.schemas";
+import { useState } from 'react';
+import { TextField, Button, Stack, Container } from '@mui/material';
+import type { LoginRequest, UserCreate } from '../api/fastAPI.schemas';
 
 type AuthFormProps = {
-  mode: "login" | "register";
-  onSubmit: (
-    data: LoginRequest | UserCreate,
-    mode: "login" | "register"
-  ) => void;
+  mode: 'login' | 'register';
+  onSubmit: (data: LoginRequest | UserCreate, mode: 'login' | 'register') => void;
 };
 
 export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
-  const [email, setEmail] = useState(""); //for login it can be email or username
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [fullname, setFullname] = useState("");
+  const [email, setEmail] = useState(''); //for login it can be email or username
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [fullname, setFullname] = useState('');
 
-  const handleSubmit = (e: React.FormEvent, mode: "login" | "register") => {
+  const handleSubmit = (e: React.FormEvent, mode: 'login' | 'register') => {
     e.preventDefault();
-    if (mode === "login") {
+    if (mode === 'login') {
       const loginData: LoginRequest = {
         username,
-        password,
+        password
       };
       onSubmit(loginData, mode);
     } else {
@@ -30,7 +27,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
         email,
         password,
         username,
-        fullName: "",
+        fullName: ''
       };
       onSubmit(registerData, mode);
     }
@@ -42,14 +39,14 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
       onSubmit={(e) => handleSubmit(e, mode)}
       noValidate
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        gap: 4,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        gap: 4
       }}
     >
       <Stack spacing={2}>
-        {mode === "register" && (
+        {mode === 'register' && (
           <TextField
             label="Full Name"
             variant="outlined"
@@ -59,7 +56,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
             onChange={(e) => setFullname(e.target.value)}
           />
         )}
-        {mode === "register" && (
+        {mode === 'register' && (
           <TextField
             label="Email"
             variant="outlined"
@@ -89,7 +86,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
         />
       </Stack>
       <Button type="submit" variant="contained" color="primary" fullWidth>
-        {mode === "login" ? "Login" : "Register"}
+        {mode === 'login' ? 'Login' : 'Register'}
       </Button>
     </Container>
   );

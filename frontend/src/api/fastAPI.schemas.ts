@@ -4,8 +4,7 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-export type EventTypeEnum = typeof EventTypeEnum[keyof typeof EventTypeEnum];
-
+export type EventTypeEnum = (typeof EventTypeEnum)[keyof typeof EventTypeEnum];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const EventTypeEnum = {
@@ -16,7 +15,7 @@ export const EventTypeEnum = {
   TASK_DELETED: 'TASK_DELETED',
   TASK_STATUS_CHANGED: 'TASK_STATUS_CHANGED',
   TASK_DUE_SOON: 'TASK_DUE_SOON',
-  TASK_COMPLETED: 'TASK_COMPLETED',
+  TASK_COMPLETED: 'TASK_COMPLETED'
 } as const;
 
 export interface HTTPValidationError {
@@ -159,15 +158,14 @@ export interface WorkspaceResponse {
   status: WorkspaceStatusEnum;
 }
 
-export type WorkspaceStatusEnum = typeof WorkspaceStatusEnum[keyof typeof WorkspaceStatusEnum];
-
+export type WorkspaceStatusEnum = (typeof WorkspaceStatusEnum)[keyof typeof WorkspaceStatusEnum];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const WorkspaceStatusEnum = {
   ACTIVE: 'ACTIVE',
   PLANNING: 'PLANNING',
   ON_HOLD: 'ON_HOLD',
-  COMPLETED: 'COMPLETED',
+  COMPLETED: 'COMPLETED'
 } as const;
 
 export interface WorkspaceStatusResponse {
@@ -176,6 +174,5 @@ export interface WorkspaceStatusResponse {
 }
 
 export type DeleteWorkspaceApiWorkspaceDeleteParams = {
-workspace_id: string;
+  workspace_id: string;
 };
-

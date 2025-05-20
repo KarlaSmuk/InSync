@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
 
 const AXIOS_INSTANCE = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL
 });
 
 export const customInstance = async <T = unknown>(
@@ -15,10 +15,10 @@ export const customInstance = async <T = unknown>(
       ...options,
       headers: {
         ...config.headers,
-        ...options?.headers,
+        ...options?.headers
         // Add Authorization header here if you use JWT later
       },
-      withCredentials: false, // change to true if using cookies/sessions
+      withCredentials: false // change to true if using cookies/sessions
       //paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
     });
 

@@ -4,80 +4,89 @@
  * FastAPI
  * OpenAPI spec version: 0.1.0
  */
-import type {
-  UserNotificationResponse,
-  UserResponse,
-  UserUpdate
-} from '../fastAPI.schemas';
+import type { UserNotificationResponse, UserResponse, UserUpdate } from '../fastAPI.schemas';
 
 import { customInstance } from '../../utils/customAxios';
 
-
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-
-  export const getUser = () => {
-/**
- * @summary Get Users
- */
-const getUsersApiUserAllGet = (
-    
- options?: SecondParameter<typeof customInstance>,) => {
-      return customInstance<UserResponse[]>(
-      {url: `/api/user/all`, method: 'GET'
-    },
-      options);
-    }
+export const getUser = () => {
   /**
- * @summary Get User
- */
-const getUserApiUserUserIdGet = (
+   * @summary Get Users
+   */
+  const getUsersApiUserAllGet = (options?: SecondParameter<typeof customInstance>) => {
+    return customInstance<UserResponse[]>({ url: `/api/user/all`, method: 'GET' }, options);
+  };
+  /**
+   * @summary Get User
+   */
+  const getUserApiUserUserIdGet = (
     userId: string,
- options?: SecondParameter<typeof customInstance>,) => {
-      return customInstance<UserResponse>(
-      {url: `/api/user/${userId}`, method: 'GET'
-    },
-      options);
-    }
+    options?: SecondParameter<typeof customInstance>
+  ) => {
+    return customInstance<UserResponse>({ url: `/api/user/${userId}`, method: 'GET' }, options);
+  };
   /**
- * @summary Update User
- */
-const updateUserApiUserUserIdPut = (
+   * @summary Update User
+   */
+  const updateUserApiUserUserIdPut = (
     userId: string,
     userUpdate: UserUpdate,
- options?: SecondParameter<typeof customInstance>,) => {
-      return customInstance<UserResponse>(
-      {url: `/api/user/${userId}`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
-      data: userUpdate
-    },
-      options);
-    }
+    options?: SecondParameter<typeof customInstance>
+  ) => {
+    return customInstance<UserResponse>(
+      {
+        url: `/api/user/${userId}`,
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        data: userUpdate
+      },
+      options
+    );
+  };
   /**
- * @summary Delete User
- */
-const deleteUserApiUserUserIdDelete = (
+   * @summary Delete User
+   */
+  const deleteUserApiUserUserIdDelete = (
     userId: string,
- options?: SecondParameter<typeof customInstance>,) => {
-      return customInstance<UserResponse>(
-      {url: `/api/user/${userId}`, method: 'DELETE'
-    },
-      options);
-    }
+    options?: SecondParameter<typeof customInstance>
+  ) => {
+    return customInstance<UserResponse>({ url: `/api/user/${userId}`, method: 'DELETE' }, options);
+  };
   /**
- * @summary Get User Notifications
- */
-const getUserNotificationsApiUserUserIdNotificationsGet = (
+   * @summary Get User Notifications
+   */
+  const getUserNotificationsApiUserUserIdNotificationsGet = (
     userId: string,
- options?: SecondParameter<typeof customInstance>,) => {
-      return customInstance<UserNotificationResponse[]>(
-      {url: `/api/user/${userId}/notifications`, method: 'GET'
-    },
-      options);
-    }
-  return {getUsersApiUserAllGet,getUserApiUserUserIdGet,updateUserApiUserUserIdPut,deleteUserApiUserUserIdDelete,getUserNotificationsApiUserUserIdNotificationsGet}};
-export type GetUsersApiUserAllGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUser>['getUsersApiUserAllGet']>>>
-export type GetUserApiUserUserIdGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUser>['getUserApiUserUserIdGet']>>>
-export type UpdateUserApiUserUserIdPutResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUser>['updateUserApiUserUserIdPut']>>>
-export type DeleteUserApiUserUserIdDeleteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUser>['deleteUserApiUserUserIdDelete']>>>
-export type GetUserNotificationsApiUserUserIdNotificationsGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUser>['getUserNotificationsApiUserUserIdNotificationsGet']>>>
+    options?: SecondParameter<typeof customInstance>
+  ) => {
+    return customInstance<UserNotificationResponse[]>(
+      { url: `/api/user/${userId}/notifications`, method: 'GET' },
+      options
+    );
+  };
+  return {
+    getUsersApiUserAllGet,
+    getUserApiUserUserIdGet,
+    updateUserApiUserUserIdPut,
+    deleteUserApiUserUserIdDelete,
+    getUserNotificationsApiUserUserIdNotificationsGet
+  };
+};
+export type GetUsersApiUserAllGetResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getUser>['getUsersApiUserAllGet']>>
+>;
+export type GetUserApiUserUserIdGetResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getUser>['getUserApiUserUserIdGet']>>
+>;
+export type UpdateUserApiUserUserIdPutResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getUser>['updateUserApiUserUserIdPut']>>
+>;
+export type DeleteUserApiUserUserIdDeleteResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getUser>['deleteUserApiUserUserIdDelete']>>
+>;
+export type GetUserNotificationsApiUserUserIdNotificationsGetResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getUser>['getUserNotificationsApiUserUserIdNotificationsGet']>
+  >
+>;
