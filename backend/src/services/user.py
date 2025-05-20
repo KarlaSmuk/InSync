@@ -14,10 +14,13 @@ class UserService:
         self.db = db
 
     def create_user(self, user: UserCreate):
-        # Check if user already exists
-        existing_user = self.db.query(User).filter(User.email == user.email).first()
-        if existing_user:
+        # Check if email exists
+        if self.db.query(User).filter(User.email == user.email).first():
             raise ValueError("User with this email already exists.")
+
+        # Check if username exists
+        if self.db.query(User).filter(User.username == user.username).first():
+            raise ValueError("User with this username already exists.")
 
         hashedPassword = get_password_hash(user.password)
 

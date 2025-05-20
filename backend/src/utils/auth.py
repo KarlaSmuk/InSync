@@ -54,8 +54,6 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = UUID(payload.get("sub"))
     except (JWTError, ValueError, TypeError):
-        print(JWTError)
-        print(ValueError)
         raise HTTPException(status_code=401, detail="Invalid token")
 
     user = db.query(User).filter(User.id == user_id).first()

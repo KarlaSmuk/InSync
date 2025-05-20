@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from db.db import get_db  # Make sure to import your database session
 from schemas.user import UserUpdate, UserResponse, UserNotificationResponse
 from services.user import UserService
+from utils.auth import get_current_user
 
 router = APIRouter(prefix="/api/user", tags=["user"])
 
@@ -19,7 +20,7 @@ def get_users(db: Session = Depends(get_db)):
 
 
 @router.get("/{user_id}", response_model=UserResponse)
-def get_user(user_id: UUID, db: Session = Depends(get_db)):
+def get_user(user_id: UUID, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     user_service = UserService(db)
     user = user_service.get_user(user_id)
     if not user:
