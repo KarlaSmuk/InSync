@@ -12,7 +12,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
   const [email, setEmail] = useState(''); //for login it can be email or username
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  const [fullname, setFullname] = useState('');
+  const [fullName, setFullname] = useState('');
 
   const handleSubmit = (e: React.FormEvent, mode: 'login' | 'register') => {
     e.preventDefault();
@@ -27,7 +27,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
         email,
         password,
         username,
-        fullName: ''
+        fullName
       };
       onSubmit(registerData, mode);
     }
@@ -43,8 +43,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
         flexDirection: 'column',
         justifyContent: 'space-between',
         gap: 4
-      }}
-    >
+      }}>
       <Stack spacing={2}>
         {mode === 'register' && (
           <TextField
@@ -52,7 +51,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
             variant="outlined"
             fullWidth
             required
-            value={fullname}
+            value={fullName}
             onChange={(e) => setFullname(e.target.value)}
           />
         )}

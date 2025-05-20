@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
+import { getAccessToken } from './auth';
 
 const AXIOS_INSTANCE = axios.create({
   baseURL: import.meta.env.VITE_API_URL
@@ -9,14 +10,16 @@ export const customInstance = async <T = unknown>(
   config: AxiosRequestConfig,
   options?: AxiosRequestConfig
 ): Promise<T> => {
+  const token = getAccessToken()
+
   try {
     const response = await AXIOS_INSTANCE.request<T>({
       ...config,
       ...options,
       headers: {
         ...config.headers,
-        ...options?.headers
-        // Add Authorization header here if you use JWT later
+        ...options?.headers,
+        Authorization: token ? `Bearer ${token}` : '',
       },
       withCredentials: false // change to true if using cookies/sessions
       //paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
