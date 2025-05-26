@@ -23,4 +23,4 @@ class Task(Base):
     workspace = relationship("Workspace", back_populates="tasks")
     status = relationship("WorkspaceTaskStatus", back_populates="tasks")
     notifications = relationship("Notification", back_populates="task", cascade="all, delete-orphan")
-    assignees = relationship("AssigneeTask", back_populates="task")
+    assignees = relationship("AssigneeTask", back_populates="task", cascade="all, delete-orphan", passive_deletes=True)

@@ -33,4 +33,4 @@ class Notification(Base):
 
     # Relationship
     task = relationship("Task", back_populates="notifications")
-    recipients = relationship("RecipientNotification", back_populates="notification")
+    recipients = relationship("RecipientNotification", back_populates="notification", passive_deletes=True)

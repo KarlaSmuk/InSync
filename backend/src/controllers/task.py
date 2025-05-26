@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 
 from db.db import get_db
@@ -82,3 +82,14 @@ def get_task_status(task_id: UUID, db: Session = Depends(get_db)):
     status = task_service.get_task_status(task_id)
 
     return status
+
+
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT,
+               responses={404: {"description": "Task not found"}})
+async def delete_task(task_id: UUID, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    service = TaskService(db)
+
+    success = await service.delete_task(task_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

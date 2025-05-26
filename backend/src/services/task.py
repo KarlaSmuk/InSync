@@ -128,3 +128,13 @@ class TaskService:
         self.db.commit()
 
         return notification
+
+    async def delete_task(self, task_id: UUID):
+        task = self.db.query(Task).filter(Task.id == task_id).first()
+        if not task:
+            return False
+
+        self.db.delete(task)
+        self.db.commit()
+
+        return True
