@@ -6,6 +6,7 @@
  */
 import type {
   DeleteWorkspaceApiWorkspaceDeleteParams,
+  TaskResponse,
   UserResponse,
   WorkspaceCreate,
   WorkspaceMembersCreate,
@@ -102,7 +103,18 @@ const getWorkspaceMembersApiWorkspaceWorkspaceIdMembersGet = (
     },
       options);
     }
-  return {createWorkspaceApiWorkspacePost,deleteWorkspaceApiWorkspaceDelete,addWorkspaceMembersApiWorkspaceMembersPost,getWorkspacesByUserApiWorkspaceAllGet,getWorkspaceByIdApiWorkspaceWorkspaceIdGet,getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet,getWorkspaceMembersApiWorkspaceWorkspaceIdMembersGet}};
+  /**
+ * @summary Get Tasks By Workspace
+ */
+const getTasksByWorkspaceApiWorkspaceWorkspaceIdTasksGet = (
+    workspaceId: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<TaskResponse[]>(
+      {url: `/api/workspace/${workspaceId}/tasks`, method: 'GET'
+    },
+      options);
+    }
+  return {createWorkspaceApiWorkspacePost,deleteWorkspaceApiWorkspaceDelete,addWorkspaceMembersApiWorkspaceMembersPost,getWorkspacesByUserApiWorkspaceAllGet,getWorkspaceByIdApiWorkspaceWorkspaceIdGet,getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet,getWorkspaceMembersApiWorkspaceWorkspaceIdMembersGet,getTasksByWorkspaceApiWorkspaceWorkspaceIdTasksGet}};
 export type CreateWorkspaceApiWorkspacePostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['createWorkspaceApiWorkspacePost']>>>
 export type DeleteWorkspaceApiWorkspaceDeleteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['deleteWorkspaceApiWorkspaceDelete']>>>
 export type AddWorkspaceMembersApiWorkspaceMembersPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['addWorkspaceMembersApiWorkspaceMembersPost']>>>
@@ -110,3 +122,4 @@ export type GetWorkspacesByUserApiWorkspaceAllGetResult = NonNullable<Awaited<Re
 export type GetWorkspaceByIdApiWorkspaceWorkspaceIdGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['getWorkspaceByIdApiWorkspaceWorkspaceIdGet']>>>
 export type GetWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet']>>>
 export type GetWorkspaceMembersApiWorkspaceWorkspaceIdMembersGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['getWorkspaceMembersApiWorkspaceWorkspaceIdMembersGet']>>>
+export type GetTasksByWorkspaceApiWorkspaceWorkspaceIdTasksGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getWorkspace>['getTasksByWorkspaceApiWorkspaceWorkspaceIdTasksGet']>>>

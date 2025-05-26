@@ -13,7 +13,6 @@ import {
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -71,7 +70,6 @@ export default function DashboardLayout() {
               {[
                 { text: 'Dashboard', icon: <DashboardIcon /> },
                 { text: 'Workspaces', icon: <WorkspacesIcon /> },
-                { text: 'Tasks', icon: <AssignmentIcon /> },
                 { text: 'Notifications', icon: <NotificationsIcon /> }
               ].map(({ text, icon }) => (
                 <ListItem key={text} disablePadding>

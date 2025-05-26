@@ -15,10 +15,11 @@ import {
 import AuthForm from '../components/AuthForm';
 import { getAuth } from '../api/auth/auth';
 import type { LoginRequest, UserCreate } from '../api/fastAPI.schemas';
-import { saveAccessToken } from '../utils/auth';
+import { getCurrentUser, saveAccessToken } from '../utils/auth';
 import { useNavigate, type ErrorResponse } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
+import { useUser } from '../hooks/useUser';
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ function AuthPage() {
   const [tab, setTab] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
+  const { setUser } = useUser();
 
   const { registerUserApiAuthRegisterPost, loginApiAuthLoginPost } = getAuth();
 
@@ -37,8 +39,13 @@ function AuthPage() {
 
   const loginMutation = useMutation({
     mutationFn: (data: LoginRequest) => loginApiAuthLoginPost(data),
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       saveAccessToken(response.accessToken);
+      const user = await getCurrentUser(); // fetch user from backend
+
+      if (user) {
+        setUser(user); // update context
+      }
       navigate('/');
     },
     onError: (error: AxiosError<ErrorResponse>) => {

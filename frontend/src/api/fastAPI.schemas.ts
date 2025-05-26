@@ -90,19 +90,16 @@ export type TaskUpdateDescription = string | null;
 
 export type TaskUpdateDueDate = string | null;
 
-export type TaskUpdateWorkspaceId = string | null;
-
 export type TaskUpdateStatusId = string | null;
 
-export type TaskUpdateAssignee = string | null;
+export type TaskUpdateAssignees = string[] | null;
 
 export interface TaskUpdate {
   title?: TaskUpdateTitle;
   description?: TaskUpdateDescription;
   dueDate?: TaskUpdateDueDate;
-  workspaceId?: TaskUpdateWorkspaceId;
   statusId?: TaskUpdateStatusId;
-  assignee?: TaskUpdateAssignee;
+  assignees?: TaskUpdateAssignees;
 }
 
 export interface TokenResponse {

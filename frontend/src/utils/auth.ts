@@ -42,7 +42,6 @@ export async function getCurrentUser() {
             return null;
         }
         const user = await getUserApiUserUserIdGet(decoded.sub);
-        console.log('User data:', user);
         return user;
     } catch (error) {
         console.error('Error fetching current user:', error);
