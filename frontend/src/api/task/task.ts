@@ -58,6 +58,17 @@ const getTaskApiTaskTaskIdGet = (
       options);
     }
   /**
+ * @summary Delete Task
+ */
+const deleteTaskApiTaskTaskIdDelete = (
+    taskId: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<void>(
+      {url: `/api/task/${taskId}`, method: 'DELETE'
+    },
+      options);
+    }
+  /**
  * @summary Get Task Status
  */
 const getTaskStatusApiTaskTaskIdStatusGet = (
@@ -68,8 +79,9 @@ const getTaskStatusApiTaskTaskIdStatusGet = (
     },
       options);
     }
-  return {createTaskApiTaskPost,updateTaskApiTaskTaskIdPut,getTaskApiTaskTaskIdGet,getTaskStatusApiTaskTaskIdStatusGet}};
+  return {createTaskApiTaskPost,updateTaskApiTaskTaskIdPut,getTaskApiTaskTaskIdGet,deleteTaskApiTaskTaskIdDelete,getTaskStatusApiTaskTaskIdStatusGet}};
 export type CreateTaskApiTaskPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['createTaskApiTaskPost']>>>
 export type UpdateTaskApiTaskTaskIdPutResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['updateTaskApiTaskTaskIdPut']>>>
 export type GetTaskApiTaskTaskIdGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['getTaskApiTaskTaskIdGet']>>>
+export type DeleteTaskApiTaskTaskIdDeleteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['deleteTaskApiTaskTaskIdDelete']>>>
 export type GetTaskStatusApiTaskTaskIdStatusGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['getTaskStatusApiTaskTaskIdStatusGet']>>>

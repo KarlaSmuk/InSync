@@ -161,7 +161,6 @@ export default function Workspace() {
                   <Box>Name</Box>
                   <Box>Assignees</Box>
                   <Box>Due date</Box>
-                  <Box />
                 </Box>
 
                 {tasksByStatus[status.id]?.map((task) => (
@@ -238,9 +237,6 @@ export default function Workspace() {
                     <Typography fontSize={'12px'} sx={{ '&:hover': { opacity: 0.7 } }}>
                       + Add Task
                     </Typography>
-                    <Box />
-                    <Box />
-                    <Box />
                   </Box>
                 )}
               </Box>
