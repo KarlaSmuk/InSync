@@ -1,4 +1,3 @@
-// src/context/UserProvider.tsx
 import { useEffect, useState } from 'react';
 import { getCurrentUser } from '../utils/auth';
 import { UserContext } from './UserContext';

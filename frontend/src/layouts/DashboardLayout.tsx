@@ -1,4 +1,3 @@
-// src/layouts/DashboardLayout.tsx
 import {
   Avatar,
   Box,
@@ -81,7 +80,6 @@ export default function DashboardLayout() {
         </Box>
       </Drawer>
 
-      {/* Main Content */}
       <Box
         component="main"
         sx={{

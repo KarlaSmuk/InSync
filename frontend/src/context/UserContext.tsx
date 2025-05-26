@@ -1,4 +1,3 @@
-// src/context/UserContext.ts
 import { createContext } from 'react';
 import type { User } from './UserProvider';
 
