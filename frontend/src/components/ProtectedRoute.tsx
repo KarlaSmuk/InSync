@@ -1,12 +1,12 @@
-// components/ProtectedRoute.tsx
 import { Navigate, Outlet } from 'react-router-dom';
-import { getAccessToken, isTokenExpired } from '../utils/auth';
+import { useUser } from '../hooks/useUser';
 
 const ProtectedRoute = () => {
-  const token = getAccessToken();
-  const isAuthenticated = token && !isTokenExpired(token);
+  const { user, loading } = useUser();
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/auth" replace />;
+  if (loading) return null;
+
+  return user ? <Outlet /> : <Navigate to="/auth" replace />;
 };
 
 export default ProtectedRoute;

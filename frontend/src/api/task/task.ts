@@ -14,81 +14,62 @@ import type {
 
 import { customInstance } from '../../utils/customAxios';
 
+
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export const getTask = () => {
-  /**
-   * @summary Create Task
-   */
-  const createTaskApiTaskPost = (
+
+  export const getTask = () => {
+/**
+ * @summary Create Task
+ */
+const createTaskApiTaskPost = (
     taskCreate: TaskCreate,
-    options?: SecondParameter<typeof customInstance>
-  ) => {
-    return customInstance<TaskCreateResponse>(
-      {
-        url: `/api/task/`,
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        data: taskCreate
-      },
-      options
-    );
-  };
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<TaskCreateResponse>(
+      {url: `/api/task/`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: taskCreate
+    },
+      options);
+    }
   /**
-   * @summary Update Task
-   */
-  const updateTaskApiTaskTaskIdPut = (
+ * @summary Update Task
+ */
+const updateTaskApiTaskTaskIdPut = (
     taskId: string,
     taskUpdate: TaskUpdate,
-    options?: SecondParameter<typeof customInstance>
-  ) => {
-    return customInstance<TaskCreateResponse>(
-      {
-        url: `/api/task/${taskId}`,
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        data: taskUpdate
-      },
-      options
-    );
-  };
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<TaskCreateResponse>(
+      {url: `/api/task/${taskId}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: taskUpdate
+    },
+      options);
+    }
   /**
-   * @summary Get Task
-   */
-  const getTaskApiTaskTaskIdGet = (
+ * @summary Get Task
+ */
+const getTaskApiTaskTaskIdGet = (
     taskId: string,
-    options?: SecondParameter<typeof customInstance>
-  ) => {
-    return customInstance<TaskResponse>({ url: `/api/task/${taskId}`, method: 'GET' }, options);
-  };
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<TaskResponse>(
+      {url: `/api/task/${taskId}`, method: 'GET'
+    },
+      options);
+    }
   /**
-   * @summary Get Task Status
-   */
-  const getTaskStatusApiTaskTaskIdStatusGet = (
+ * @summary Get Task Status
+ */
+const getTaskStatusApiTaskTaskIdStatusGet = (
     taskId: string,
-    options?: SecondParameter<typeof customInstance>
-  ) => {
-    return customInstance<WorkspaceStatusResponse>(
-      { url: `/api/task/${taskId}/status`, method: 'GET' },
-      options
-    );
-  };
-  return {
-    createTaskApiTaskPost,
-    updateTaskApiTaskTaskIdPut,
-    getTaskApiTaskTaskIdGet,
-    getTaskStatusApiTaskTaskIdStatusGet
-  };
-};
-export type CreateTaskApiTaskPostResult = NonNullable<
-  Awaited<ReturnType<ReturnType<typeof getTask>['createTaskApiTaskPost']>>
->;
-export type UpdateTaskApiTaskTaskIdPutResult = NonNullable<
-  Awaited<ReturnType<ReturnType<typeof getTask>['updateTaskApiTaskTaskIdPut']>>
->;
-export type GetTaskApiTaskTaskIdGetResult = NonNullable<
-  Awaited<ReturnType<ReturnType<typeof getTask>['getTaskApiTaskTaskIdGet']>>
->;
-export type GetTaskStatusApiTaskTaskIdStatusGetResult = NonNullable<
-  Awaited<ReturnType<ReturnType<typeof getTask>['getTaskStatusApiTaskTaskIdStatusGet']>>
->;
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<WorkspaceStatusResponse>(
+      {url: `/api/task/${taskId}/status`, method: 'GET'
+    },
+      options);
+    }
+  return {createTaskApiTaskPost,updateTaskApiTaskTaskIdPut,getTaskApiTaskTaskIdGet,getTaskStatusApiTaskTaskIdStatusGet}};
+export type CreateTaskApiTaskPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['createTaskApiTaskPost']>>>
+export type UpdateTaskApiTaskTaskIdPutResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['updateTaskApiTaskTaskIdPut']>>>
+export type GetTaskApiTaskTaskIdGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['getTaskApiTaskTaskIdGet']>>>
+export type GetTaskStatusApiTaskTaskIdStatusGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getTask>['getTaskStatusApiTaskTaskIdStatusGet']>>>

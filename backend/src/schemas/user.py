@@ -59,3 +59,9 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     accessToken: str
     tokenType: str = "bearer"
+
+
+class DashboardSummary(BaseModel):
+    workspaceCount: int
+    taskCount: int
+    unreadNotifications: int

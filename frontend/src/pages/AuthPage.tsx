@@ -1,21 +1,38 @@
 import { useState } from 'react';
-import { Container, Typography, Tabs, Tab, Paper, Alert } from '@mui/material';
+import {
+  Container,
+  Box,
+  Card,
+  Typography,
+  Tabs,
+  Tab,
+  Alert,
+  useMediaQuery,
+  useTheme,
+  Link,
+  Snackbar
+} from '@mui/material';
 import AuthForm from '../components/AuthForm';
 import { getAuth } from '../api/auth/auth';
 import type { LoginRequest, UserCreate } from '../api/fastAPI.schemas';
 import { saveAccessToken } from '../utils/auth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, type ErrorResponse } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
 
 function AuthPage() {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [tab, setTab] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
+
   const { registerUserApiAuthRegisterPost, loginApiAuthLoginPost } = getAuth();
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
-    setErrorMessage(''); // Clear error message when switching tabs
+    setErrorMessage('');
   };
 
   const loginMutation = useMutation({
@@ -24,28 +41,26 @@ function AuthPage() {
       saveAccessToken(response.accessToken);
       navigate('/');
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (error: any) => {
-      const message = error?.response?.data?.detail || 'Login failed';
-      setErrorMessage(message);
+    onError: (error: AxiosError<ErrorResponse>) => {
+      setErrorMessage(error.message || 'Login failed');
+      setShowToast(true);
     }
   });
 
   const registerMutation = useMutation({
     mutationFn: (data: UserCreate) => registerUserApiAuthRegisterPost(data),
     onSuccess: () => {
-      setTab(0); // switch to login
-      setErrorMessage('');
+      setTab(0);
+      setErrorMessage('Account created! Please log in.');
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (error: any) => {
-      const message = error?.message || 'Registration failed';
-      setErrorMessage(message);
+    onError: (error: AxiosError<ErrorResponse>) => {
+      setErrorMessage(error.message || 'Registration failed');
+      setShowToast(true);
     }
   });
 
-  const handleAuthSubmit = async (data: LoginRequest | UserCreate, mode: 'login' | 'register') => {
-    if (mode === 'login') {
+  const handleAuthSubmit = (data: LoginRequest | UserCreate) => {
+    if (tab === 0) {
       loginMutation.mutate(data as LoginRequest);
     } else {
       registerMutation.mutate(data as UserCreate);
@@ -54,47 +69,81 @@ function AuthPage() {
 
   return (
     <Container
+      disableGutters
       sx={{
+        minHeight: '100vh',
+        minWidth: '100vw',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '100vh',
-        textAlign: 'center'
+        background: 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)'
       }}>
-      <Paper
-        elevation={4}
+      <Card
+        elevation={6}
         sx={{
-          width: '500px',
-          height: '580px',
+          backdropFilter: 'blur(8px)',
+          bgcolor: 'rgba(20, 30, 50, 0.9)',
+          borderRadius: 3,
           p: 4,
-          borderRadius: 2,
-          border: '1px solid',
-          borderColor: 'divider'
+          width: isMobile ? '90%' : 400,
+          textAlign: 'center'
         }}>
-        <Typography
-          component="h1"
-          variant="h4"
-          fontWeight={600}
-          color="primary"
-          marginBottom={'8px'}>
+        <Typography variant={isMobile ? 'h5' : 'h4'} fontWeight={700} color="primary" gutterBottom>
           InSync
         </Typography>
-        <Typography component="p" variant="body2" color="text.secondary" marginBottom={'32px'}>
-          Project Management App
+        <Typography variant="body2" color="text.secondary" mb={3}>
+          Project Management Simplified
         </Typography>
-        <Tabs value={tab} onChange={handleTabChange} variant="fullWidth" sx={{ marginBottom: 3 }}>
+
+        <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="fullWidth"
+          sx={{ mb: 2 }}>
           <Tab label="Login" />
           <Tab label="Register" />
         </Tabs>
 
         <AuthForm mode={tab === 0 ? 'login' : 'register'} onSubmit={handleAuthSubmit} />
-        {errorMessage && (
-          <Alert severity="error" sx={{ mt: 2 }}>
+
+        <Snackbar
+          open={showToast}
+          autoHideDuration={3000}
+          onClose={() => setShowToast(false)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+          <Alert onClose={() => setShowToast(false)} severity={'error'}>
             {errorMessage}
           </Alert>
-        )}
-      </Paper>
+        </Snackbar>
+
+        <Box mt={3}>
+          {tab === 0 ? (
+            <Typography variant="body2">
+              Don't have an account?{' '}
+              <Link component="button" variant="body2" onClick={() => setTab(1)}>
+                Register
+              </Link>
+            </Typography>
+          ) : (
+            <Typography variant="body2">
+              Already registered?{' '}
+              <Link component="button" variant="body2" onClick={() => setTab(0)}>
+                Login
+              </Link>
+            </Typography>
+          )}
+        </Box>
+
+        {/* {tab === 0 && (
+          <Box mt={1}>
+            <Link href="/forgot-password" variant="body2">
+              Forgot password?
+            </Link>
+          </Box>
+        )} */}
+      </Card>
     </Container>
   );
 }

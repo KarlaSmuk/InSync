@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from db.db import get_db  # Make sure to import your database session
-from schemas.user import UserUpdate, UserResponse, UserNotificationResponse
+from db.models import User
+from schemas.user import UserUpdate, UserResponse, UserNotificationResponse, DashboardSummary
 from services.user import UserService
 from utils.auth import get_current_user
 
@@ -53,3 +54,17 @@ def get_user_notifications(user_id: UUID, db: Session = Depends(get_db)):
     if not notifications:
         raise HTTPException(status_code=404, detail="User not found")
     return notifications
+
+
+@router.get("/dashboard/summary", response_model=DashboardSummary)
+def get_user_dashboard_summary(
+        db: Session = Depends(get_db),
+        user: User = Depends(get_current_user)
+):
+    user_service = UserService(db)
+    summary = user_service.get_dashboard_summary(user.id)
+
+    if not summary:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return summary

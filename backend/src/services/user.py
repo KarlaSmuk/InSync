@@ -4,8 +4,8 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from db.models import User, Notification, RecipientNotification
-from schemas.user import UserCreate, UserUpdate
+from db.models import User, Notification, RecipientNotification, WorkspaceUser, AssigneeTask
+from schemas.user import UserCreate, UserUpdate, DashboardSummary
 from utils.auth import get_password_hash
 
 
@@ -74,3 +74,20 @@ class UserService:
             RecipientNotification.recipientId == user_id).all()
 
         return notifications
+
+    def get_dashboard_summary(self, user_id: UUID) -> DashboardSummary | None:
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return None
+
+        workspace_count = self.db.query(WorkspaceUser).filter_by(userId=user.id).count()
+        task_count = self.db.query(AssigneeTask).filter_by(assigneeId=user.id).count()
+        unread_notifications = self.db.query(RecipientNotification).filter_by(
+            recipientId=user.id, isRead=False
+        ).count()
+
+        return DashboardSummary(
+            workspaceCount=workspace_count,
+            taskCount=task_count,
+            unreadNotifications=unread_notifications
+        )
