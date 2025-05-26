@@ -9,8 +9,8 @@ class AssigneeTask(Base):
     __tablename__ = 'assignee_task'
 
     assigneeId = Column(UUID, ForeignKey("user.id"), primary_key=True)
-    taskId = Column(UUID, ForeignKey("task.id"), primary_key=True)
+    taskId = Column(UUID, ForeignKey("task.id", ondelete='CASCADE'), primary_key=True)
 
     # relationships
     assignee = relationship("User", back_populates="assigned_tasks")
-    task = relationship("Task", back_populates="assignees")
+    task = relationship("Task", back_populates="assignees", passive_deletes=True)

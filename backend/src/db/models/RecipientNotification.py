@@ -10,10 +10,10 @@ class RecipientNotification(Base):
     __tablename__ = 'recipient_notification'
 
     recipientId = Column(UUID, ForeignKey("user.id"), primary_key=True)
-    notificationId = Column(UUID, ForeignKey("notification.id"), primary_key=True)
+    notificationId = Column(UUID, ForeignKey("notification.id", ondelete='CASCADE'), primary_key=True)
     isRead = Column(BOOLEAN, default=False)
     notifiedAt = Column(TIMESTAMP, default=func.now())
 
     # relationships
-    recipient = relationship("User", back_populates="notifications")
+    recipient = relationship("User", back_populates="notifications", passive_deletes=True)
     notification = relationship("Notification", back_populates="recipients")
