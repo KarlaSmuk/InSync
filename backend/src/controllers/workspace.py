@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from db.db import get_db
+from schemas.task import TaskResponse
 from schemas.user import UserResponse
 from schemas.workspace import WorkspaceCreate, WorkspaceResponse, WorkspaceStatusResponse, WorkspaceMembersCreate
 from services.workspace import WorkspaceService
@@ -63,3 +64,27 @@ def get_workspace_members(workspace_id: UUID, db: Session = Depends(get_db), cur
     workspace_service = WorkspaceService(db)
     members = workspace_service.get_workspace_members(workspace_id)
     return members
+
+
+@router.get("/{workspace_id}/tasks", response_model=list[TaskResponse])
+def get_tasks_by_workspace(
+        workspace_id: UUID,
+        db: Session = Depends(get_db),
+        user=Depends(get_current_user)
+):
+    workspace_service = WorkspaceService(db)
+    tasks = workspace_service.get_workspace_tasks(workspace_id)
+
+    result = []
+    for task in tasks:
+        result.append(TaskResponse(
+            id=task.id,
+            title=task.title,
+            description=task.description,
+            dueDate=task.dueDate,
+            workspaceId=task.workspaceId,
+            status=task.status,
+            assignees=[a.assignee for a in task.assignees]
+        ))
+
+    return result

@@ -1,9 +1,9 @@
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
-from db.models import Workspace, WorkspaceUser, User
+from db.models import Workspace, WorkspaceUser, User, Task, AssigneeTask
 from schemas.workspace import WorkspaceCreate
 from services.workspaceTaskStatus import WorkspaceTaskStatusService
 
@@ -78,3 +78,12 @@ class WorkspaceService:
         members = self.db.query(User).filter(User.id.in_(user_ids_subquery)).all()
 
         return members
+
+    def get_workspace_tasks(self, workspace_id: UUID):
+        tasks = (
+            self.db.query(Task)
+            .filter(Task.workspaceId == workspace_id)
+            .options(joinedload(Task.assignees).joinedload(AssigneeTask.assignee))
+            .all()
+        )
+        return tasks
