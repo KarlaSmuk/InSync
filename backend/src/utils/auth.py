@@ -19,7 +19,7 @@ load_dotenv()
 security = HTTPBearer()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 300
 ALGORITHM = "HS256"
 SECRET_KEY = os.getenv("SECRET_KEY")
 

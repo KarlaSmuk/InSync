@@ -1,7 +1,6 @@
-from typing import List
+from typing import List, Tuple
 from uuid import UUID
 
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from db.models import Task, Notification, User, RecipientNotification, AssigneeTask, WorkspaceTaskStatus
@@ -14,7 +13,7 @@ class TaskService:
         self.db = db
 
     # tasks
-    async def create_task(self, task_create: TaskCreate):
+    async def create_task(self, task_create: TaskCreate, creatorId: UUID):
         # Create a task
         task = Task(
             title=task_create.title,
@@ -35,65 +34,58 @@ class TaskService:
         self.db.commit()
         self.db.refresh(task)
 
-        await notification_manager.notify_users(task.id, EventTypeEnum.TASK_CREATED,
-                                                [assignee.assigneeId for assignee in task.assignees])
-
         return task
 
-    async def update_task(self, task_id: UUID, update_data: TaskUpdate):
-        # Fetch the task from the database
+    async def update_task(self, task_id: UUID, update_data: TaskUpdate, updatedBy: UUID):
         task = self.db.query(Task).filter(Task.id == task_id).first()
         if not task:
             return None
 
-        # Initialize the list of notifications
-        notification = None
-
-        # Track changes and events
+        # 1) Apply all changes to the task, but *don’t* commit DB yet
+        events: List[Tuple[EventTypeEnum, str]] = []
         if update_data.title is not None and update_data.title != task.title:
             task.title = update_data.title
-            notification = self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task title updated")
+            events.append((EventTypeEnum.TASK_UPDATED, "Task title updated"))
 
         if update_data.description is not None and update_data.description != task.description:
             task.description = update_data.description
-            notification = self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task description updated")
+            events.append((EventTypeEnum.TASK_UPDATED, "Task description updated"))
 
-        if update_data.dueDate is not None and update_data.dueDate != task.due_date:
-            task.due_date = update_data.dueDate
-            notification = self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task due date updated")
+        if update_data.dueDate is not None and update_data.dueDate != task.dueDate:
+            task.dueDate = update_data.dueDate
+            events.append((EventTypeEnum.TASK_UPDATED, "Task due date updated"))
 
-        if update_data.workspaceId is not None and update_data.workspaceId != task.workspace_id:
-            task.workspace_id = update_data.workspaceId
-            notification = self.create_notification(task_id, EventTypeEnum.TASK_UPDATED, "Task workspace updated")
+        if update_data.statusId is not None and update_data.statusId != task.statusId:
+            task.statusId = update_data.statusId
+            events.append((EventTypeEnum.TASK_STATUS_CHANGED, "Task status changed"))
 
-        if update_data.statusId is not None and update_data.statusId != task.status_id:
-            task.status_id = update_data.statusId
-            notification = self.create_notification(task_id, EventTypeEnum.TASK_STATUS_CHANGED, "Task status changed")
+        if update_data.assignees is not None:
+            old_ids = {a.assigneeId for a in task.assignees}
+            new_ids = set(update_data.assignees)
+            # removals
+            for rid in old_ids - new_ids:
+                # remove association
+                self.db.query(AssigneeTask).filter(
+                    AssigneeTask.taskId == task.id,
+                    AssigneeTask.assigneeId == rid
+                ).delete()
+                events.append((EventTypeEnum.TASK_UNASSIGNED, f"User {rid} unassigned"))
+            # additions
+            for aid in new_ids - old_ids:
+                task.assignees.append(AssigneeTask(assigneeId=aid, taskId=task.id))
+                events.append((EventTypeEnum.TASK_ASSIGNED, f"User {aid} assigned"))
 
-        # Check if assignee is being added or removed
-        if update_data.assignee is not None:
-            if update_data.assignee != task.assignee:
-                # Unassign the current assignee, if any
-                if task.assignee is not None:
-                    notification = self.create_notification(task_id, EventTypeEnum.TASK_UNASSIGNED, "Task unassigned")
-
-                # Assign the new assignee
-                task.assignee = update_data.assignee
-                notification = self.create_notification(task_id, EventTypeEnum.TASK_ASSIGNED, "Task assigned")
-
-        # Commit the changes to the database
         self.db.commit()
         self.db.refresh(task)
 
-        # Create notifications for each change
-        if notification is not None:
-            self.db.add(notification)
-            self.db.commit()
+        current_ids = [a.assigneeId for a in task.assignees]
+        recipients = [aid for aid in current_ids if aid != updatedBy]
 
-        await notification_manager.notify_users(task.id, notification.eventType,
-                                                [assignee.assigneeId for assignee in task.assignees])
+        for event_type, message in events:
+            notif = self.create_notification(task_id, event_type, message, recipients)
+            if recipients:
+                await notification_manager.notify_users(task.id, notif.eventType, recipients)
 
-        # Return the updated task
         return task
 
     def get_task(self, task_id: UUID):
@@ -108,42 +100,31 @@ class TaskService:
         return status
 
     # notifications
-    def create_notification(self, taskId: UUID, event_type: EventTypeEnum, message: str) -> Notification:
-        # Create the notification
+    def create_notification(
+            self,
+            taskId: UUID,
+            event_type: EventTypeEnum,
+            message: str,
+            recipient_ids: List[UUID],
+    ) -> Notification:
+        # create the notification record
         notification = Notification(
             message=message,
             eventType=event_type,
-            taskId=taskId
+            taskId=taskId,
         )
-
         self.db.add(notification)
         self.db.commit()
         self.db.refresh(notification)
 
-        # Assign recipients to notification
-        task = self.db.query(Task).filter(Task.id == taskId).first()
-        if not task:
-            raise HTTPException(status_code=404, detail="Task not found")
-
-        assignee_ids = [assignee.assigneeId for assignee in task.assignees]
-        if not assignee_ids:
-            raise HTTPException(status_code=404, detail="No assignees found for this task")
-
-        # Assign assignees to task
-        self.assign_notification_to_users(notification.id, assignee_ids)
-
-        return notification
-
-    def assign_notification_to_users(self, notification_id: UUID, recipient_ids: List[UUID]):
-
+        # only assign it to the filtered recipients
         for recipient_id in recipient_ids:
             recipient_notification = RecipientNotification(
                 recipientId=recipient_id,
-                notificationId=notification_id,
+                notificationId=notification.id,
                 isRead=False
             )
             self.db.add(recipient_notification)
-
         self.db.commit()
 
-        return "Notification successfully assigned to users"
+        return notification

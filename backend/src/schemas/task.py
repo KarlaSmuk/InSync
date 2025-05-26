@@ -22,9 +22,8 @@ class TaskUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     dueDate: Optional[date] = None
-    workspaceId: Optional[UUID] = None
     statusId: Optional[UUID] = None
-    assignee: Optional[UUID] = None
+    assignees: Optional[List[UUID]] = None
 
 
 class TaskCreateResponse(BaseModel):
