@@ -1,10 +1,12 @@
 import {
   Avatar,
   Box,
+  Collapse,
   Drawer,
   List,
   ListItem,
   ListItemButton,
+  ListItemIcon,
   ListItemText,
   Toolbar,
   Typography
@@ -12,15 +14,27 @@ import {
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
+import { getWorkspace } from '../api/workspace/workspace';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 
 const drawerWidth = 230;
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const { user } = useUser();
+  const { getWorkspacesByUserApiWorkspaceAllGet } = getWorkspace();
+  const [openWorkspaces, setOpenWorkspaces] = useState(false);
+
+  const { data: workspaces, isLoading } = useQuery({
+    queryKey: ['userWorkspaces'],
+    queryFn: getWorkspacesByUserApiWorkspaceAllGet
+  });
 
   const initials = user?.fullName
     ?.split(' ')
@@ -61,12 +75,43 @@ export default function DashboardLayout() {
                 { text: 'Notifications', icon: <NotificationsIcon /> }
               ].map(({ text, icon }) => (
                 <ListItem key={text} disablePadding>
-                  <ListItemButton
-                    onClick={() => navigate(`/${text != 'Dashboard' ? text.toLowerCase() : ''}`)}
-                    sx={{ px: 3, py: 1.5, '&:hover': { backgroundColor: '#334155' } }}>
-                    {icon}
-                    <ListItemText primary={text} sx={{ ml: 2 }} />
-                  </ListItemButton>
+                  {text === 'Workspaces' ? (
+                    <Box display={'flex'} flexDirection="column" width="100%">
+                      <ListItemButton
+                        sx={{ paddingRight: '6px' }}
+                        onClick={() => setOpenWorkspaces((prev) => !prev)}>
+                        <ListItemIcon>
+                          <WorkspacesIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Workspaces" />
+                        {openWorkspaces ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      </ListItemButton>
+
+                      <Collapse in={openWorkspaces} timeout="auto" unmountOnExit>
+                        <Box sx={{ pl: 4 }}>
+                          {isLoading ? (
+                            <ListItemText primary="Loading..." />
+                          ) : (
+                            workspaces?.map((ws) => (
+                              <ListItemButton
+                                key={ws.id}
+                                onClick={() => navigate(`/workspaces/${ws.id}`)}
+                                sx={{ pl: 2 }}>
+                                <ListItemText primary={ws.name} />
+                              </ListItemButton>
+                            ))
+                          )}
+                        </Box>
+                      </Collapse>
+                    </Box>
+                  ) : (
+                    <ListItemButton
+                      onClick={() => navigate(`/${text !== 'Dashboard' ? text.toLowerCase() : ''}`)}
+                      sx={{ px: 3, py: 1.5, '&:hover': { backgroundColor: '#334155' } }}>
+                      {icon}
+                      <ListItemText primary={text} sx={{ ml: 2 }} />
+                    </ListItemButton>
+                  )}
                 </ListItem>
               ))}
             </List>

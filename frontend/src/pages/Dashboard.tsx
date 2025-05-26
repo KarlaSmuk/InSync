@@ -28,14 +28,13 @@ export default function Dashboard() {
           boxShadow: 3
         }}>
         <Typography variant="h4" gutterBottom color="primary">
-          Welcome, {user?.fullName}
+          Welcome, {user?.fullName}!
         </Typography>
         <Typography variant="subtitle1" sx={{ mb: 4 }} color="text.secondary">
           Here’s a quick overview of your work.
         </Typography>
 
         <Box display="flex" flexDirection="column" gap={2}>
-          {/* Card: Workspaces */}
           <Card
             sx={{
               display: 'flex',
@@ -55,7 +54,6 @@ export default function Dashboard() {
             </Box>
           </Card>
 
-          {/* Card: Tasks */}
           <Card
             sx={{
               display: 'flex',
@@ -75,7 +73,6 @@ export default function Dashboard() {
             </Box>
           </Card>
 
-          {/* Card: Notifications */}
           <Card
             sx={{
               display: 'flex',
