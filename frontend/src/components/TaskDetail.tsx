@@ -34,27 +34,25 @@ import type {
   WorkspaceStatusResponse
 } from '../api/fastAPI.schemas';
 import { getTask } from '../api/task/task';
-import { getUser } from '../api/user/user';
 import { useUser } from '../hooks/useUser';
+import { getWorkspace } from '../api/workspace/workspace';
 
-export const TaskDetail = ({
-  open,
-  task,
-  statuses,
-  onClose
-}: {
+interface TaskDetailProps {
   open: boolean;
   task: TaskResponse | null;
   statuses: WorkspaceStatusResponse[];
   onClose: () => void;
-}) => {
+  workspaceId: string;
+}
+
+export const TaskDetail = ({ open, task, statuses, onClose, workspaceId }: TaskDetailProps) => {
   const qc = useQueryClient();
   const { updateTaskApiTaskTaskIdPut } = getTask();
   const { user: currentUser } = useUser();
-  const { getUsersApiUserAllGet } = getUser();
-  const { data: allUsers = [] } = useQuery<UserResponse[]>({
-    queryKey: ['allUsers'],
-    queryFn: getUsersApiUserAllGet
+  const { getWorkspaceMembersApiWorkspaceWorkspaceIdMembersGet } = getWorkspace();
+  const { data: allMembers = [] } = useQuery<UserResponse[]>({
+    queryKey: ['allMembers', workspaceId],
+    queryFn: () => getWorkspaceMembersApiWorkspaceWorkspaceIdMembersGet(workspaceId)
   });
 
   const updateTask = useMutation({
@@ -84,16 +82,16 @@ export const TaskDetail = ({
     setDueDate(task.dueDate ? new Date(task.dueDate) : null);
 
     const initAssignees: UserResponse[] = (task.assignees || [])
-      .map((assignee) => allUsers.find((user: UserResponse) => user.id === assignee.id))
+      .map((assignee) => allMembers.find((user: UserResponse) => user.id === assignee.id))
       .filter((user): user is UserResponse => user !== undefined);
 
     setAssignees(initAssignees ?? []);
-  }, [task, allUsers]);
+  }, [task, allMembers]);
 
   const filtered = useMemo(() => {
     const userSearch = search.trim().toLowerCase();
     if (!userSearch) return [];
-    return allUsers
+    return allMembers
       .filter(
         (user) =>
           !assignees.some((assignee) => assignee.id === user.id) &&
@@ -101,7 +99,7 @@ export const TaskDetail = ({
             user.email.toLowerCase().includes(userSearch))
       )
       .slice(0, 8); //to stay inside screen if user want to find specific it will enter entire username or email
-  }, [allUsers, assignees, search]);
+  }, [allMembers, assignees, search]);
 
   const addAssignee = (user: UserResponse) => {
     setAssignees((prev) => [...prev, user]);

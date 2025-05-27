@@ -11,7 +11,7 @@ import type { TaskResponse } from '../api/fastAPI.schemas';
 import { TaskDetail } from '../components/TaskDetail';
 
 export default function Workspace() {
-  const { id } = useParams<{ id: string }>();
+  const { id: workspaceId } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { user } = useUser();
 
@@ -31,9 +31,9 @@ export default function Workspace() {
     isLoading: isWorkspaceLoading,
     error: workspaceError
   } = useQuery({
-    queryKey: ['workspace', id],
-    queryFn: () => getWorkspaceByIdApiWorkspaceWorkspaceIdGet(id!),
-    enabled: Boolean(id)
+    queryKey: ['workspace', workspaceId],
+    queryFn: () => getWorkspaceByIdApiWorkspaceWorkspaceIdGet(workspaceId!),
+    enabled: Boolean(workspaceId)
   });
 
   const {
@@ -41,9 +41,9 @@ export default function Workspace() {
     isLoading: isTasksLoading,
     error: tasksError
   } = useQuery({
-    queryKey: ['workspaceTasks', id],
-    queryFn: () => getTasksByWorkspaceApiWorkspaceWorkspaceIdTasksGet(id!),
-    enabled: Boolean(id)
+    queryKey: ['workspaceTasks', workspaceId],
+    queryFn: () => getTasksByWorkspaceApiWorkspaceWorkspaceIdTasksGet(workspaceId!),
+    enabled: Boolean(workspaceId)
   });
 
   const {
@@ -51,15 +51,15 @@ export default function Workspace() {
     isLoading: isStatusesLoading,
     error: statusesError
   } = useQuery({
-    queryKey: ['workspaceStatuses', id],
-    queryFn: () => getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet(id!),
-    enabled: Boolean(id)
+    queryKey: ['workspaceStatuses', workspaceId],
+    queryFn: () => getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet(workspaceId!),
+    enabled: Boolean(workspaceId)
   });
 
   const createTaskMutation = useMutation({
     mutationFn: createTaskApiTaskPost,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspaceTasks', id] });
+      queryClient.invalidateQueries({ queryKey: ['workspaceTasks', workspaceId] });
       setAddingStatusId(null);
       setNewTaskTitle('');
     },
@@ -249,6 +249,7 @@ export default function Workspace() {
         open={Boolean(selectedTask)}
         onClose={() => setSelectedTask(null)}
         statuses={statuses || []}
+        workspaceId={workspaceId!}
       />
     </>
   );
