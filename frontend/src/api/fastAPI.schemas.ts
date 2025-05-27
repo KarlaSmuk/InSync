@@ -7,6 +7,7 @@
 export interface DashboardSummary {
   workspaceCount: number;
   taskCount: number;
+  completedTaskCount: number;
   unreadNotifications: number;
 }
 

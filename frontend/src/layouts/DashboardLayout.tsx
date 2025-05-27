@@ -3,6 +3,7 @@ import {
   Box,
   Collapse,
   Drawer,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
@@ -16,17 +17,18 @@ import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getWorkspace } from '../api/workspace/workspace';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 
-const drawerWidth = 230;
+const drawerWidth = 240;
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, logout } = useUser();
   const { getWorkspacesByUserApiWorkspaceAllGet } = getWorkspace();
   const [openWorkspaces, setOpenWorkspaces] = useState(false);
 
@@ -41,6 +43,22 @@ export default function DashboardLayout() {
     .join('')
     .toUpperCase();
 
+  const menuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, onClick: () => navigate('/') },
+    {
+      text: 'Workspaces',
+      icon: <WorkspacesIcon />,
+      collapsible: true,
+      open: openWorkspaces,
+      onClick: () => setOpenWorkspaces((prev) => !prev)
+    },
+    {
+      text: 'Notifications',
+      icon: <NotificationsIcon />,
+      onClick: () => navigate('/notifications')
+    }
+  ];
+
   return (
     <Box sx={{ display: 'flex' }}>
       <Drawer
@@ -51,86 +69,99 @@ export default function DashboardLayout() {
           [`& .MuiDrawer-paper`]: {
             width: drawerWidth,
             boxSizing: 'border-box',
-            backgroundColor: '#1e293b',
-            color: 'white'
+            bgcolor: '#1f2937',
+            color: '#f1f5f9',
+            borderRight: 0
           }
         }}>
-        <Box
-          display={'flex'}
-          flexDirection={'column'}
-          justifyContent={'space-between'}
-          sx={{ height: '100%' }}>
-          <Box>
-            <Toolbar sx={{ px: 3 }}>
-              <Typography variant="h5" noWrap>
-                InSync
-              </Typography>
-            </Toolbar>
-            <List>
-              {[
-                { text: 'Dashboard', icon: <DashboardIcon /> },
-                { text: 'Workspaces', icon: <WorkspacesIcon /> },
-                { text: 'Notifications', icon: <NotificationsIcon /> }
-              ].map(({ text, icon }) => (
-                <ListItem key={text} disablePadding>
-                  {text === 'Workspaces' ? (
-                    <Box display={'flex'} flexDirection="column" width="100%">
-                      <ListItemButton
-                        sx={{ paddingRight: '6px' }}
-                        onClick={() => setOpenWorkspaces((prev) => !prev)}>
-                        <ListItemIcon>
-                          <WorkspacesIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Workspaces" />
-                        {openWorkspaces ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                      </ListItemButton>
+        <Toolbar sx={{ px: 2, py: 3, bgcolor: '#111827' }}>
+          <Typography variant="h5" noWrap sx={{ fontWeight: 'bold', color: '#f1f5f9' }}>
+            InSync
+          </Typography>
+        </Toolbar>
+        <List disablePadding>
+          {menuItems.map(({ text, icon, onClick, collapsible, open }) => (
+            <Box key={text}>
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={onClick}
+                  sx={{ px: 3, py: 1.75, '&:hover': { bgcolor: '#374151' } }}>
+                  <ListItemIcon sx={{ color: '#f1f5f9' }}>{icon}</ListItemIcon>
+                  <ListItemText primary={text} sx={{ ml: 1 }} />
+                  {collapsible &&
+                    (open ? (
+                      <ExpandLessIcon sx={{ color: '#f1f5f9' }} />
+                    ) : (
+                      <ExpandMoreIcon sx={{ color: '#f1f5f9' }} />
+                    ))}
+                </ListItemButton>
+              </ListItem>
 
-                      <Collapse in={openWorkspaces} timeout="auto" unmountOnExit>
-                        <Box sx={{ pl: 4 }}>
-                          {isLoading ? (
-                            <ListItemText primary="Loading..." />
-                          ) : (
-                            workspaces?.map((ws) => (
-                              <ListItemButton
-                                key={ws.id}
-                                onClick={() => navigate(`/workspaces/${ws.id}`)}
-                                sx={{ pl: 2 }}>
-                                <ListItemText primary={ws.name} />
-                              </ListItemButton>
-                            ))
-                          )}
-                        </Box>
-                      </Collapse>
-                    </Box>
-                  ) : (
-                    <ListItemButton
-                      onClick={() => navigate(`/${text !== 'Dashboard' ? text.toLowerCase() : ''}`)}
-                      sx={{ px: 3, py: 1.5, '&:hover': { backgroundColor: '#334155' } }}>
-                      {icon}
-                      <ListItemText primary={text} sx={{ ml: 2 }} />
-                    </ListItemButton>
-                  )}
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-          <Box sx={{ px: 3, py: 2 }}>
-            <Avatar sx={{ bgcolor: '#38bdf8', width: 40, height: 40 }}>{initials}</Avatar>
-            <Typography variant="body2" sx={{ mt: 1 }}>
+              {collapsible && (
+                <Collapse in={open} timeout="auto" unmountOnExit>
+                  <List disablePadding>
+                    {isLoading ? (
+                      <ListItem key="loading" disablePadding>
+                        <ListItemButton sx={{ pl: 6, py: 1.25, '&:hover': { bgcolor: '#374151' } }}>
+                          <ListItemText primary="Loading..." />
+                        </ListItemButton>
+                      </ListItem>
+                    ) : (
+                      workspaces?.map((ws) => (
+                        <ListItem key={ws.id} disablePadding>
+                          <ListItemButton
+                            onClick={() => navigate(`/workspaces/${ws.id}`)}
+                            sx={{ pl: 6, py: 1.25, '&:hover': { bgcolor: '#374151' } }}>
+                            <ListItemText
+                              primary={ws.name}
+                              primaryTypographyProps={{ noWrap: true, sx: { color: '#f1f5f9' } }}
+                            />
+                          </ListItemButton>
+                        </ListItem>
+                      ))
+                    )}
+                  </List>
+                </Collapse>
+              )}
+            </Box>
+          ))}
+        </List>
+
+        <Box sx={{ flexGrow: 1 }} />
+
+        <Box
+          sx={{
+            px: 3,
+            py: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            bgcolor: '#111827'
+          }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+            <Avatar sx={{ bgcolor: '#3b82f6', width: 40, height: 40, color: '#ffffff' }}>
+              {initials}
+            </Avatar>
+            <Typography variant="body2" noWrap sx={{ ml: 2, color: '#f1f5f9' }}>
               {user?.fullName}
             </Typography>
           </Box>
+          <IconButton onClick={logout} sx={{ color: '#f1f5f9' }}>
+            <LogoutIcon />
+          </IconButton>
         </Box>
       </Drawer>
 
       <Box
         component="main"
+        display={'flex'}
+        alignItems={'center'}
+        justifyContent={'center'}
         sx={{
           flexGrow: 1,
-          bgcolor: '#f1f5f9',
+          bgcolor: '#f8fafc',
           minHeight: '100vh',
-          p: 4,
-          background: 'linear-gradient(to bottom right, #f8fafc, #e2e8f0)'
+          background: 'linear-gradient(to bottom right, #ffffff, #e5e7eb)'
         }}>
         <Outlet />
       </Box>

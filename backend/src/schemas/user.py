@@ -64,4 +64,5 @@ class TokenResponse(BaseModel):
 class DashboardSummary(BaseModel):
     workspaceCount: int
     taskCount: int
+    completedTaskCount: int
     unreadNotifications: int

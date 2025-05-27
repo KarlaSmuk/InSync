@@ -4,7 +4,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from db.models import User, Notification, RecipientNotification, WorkspaceUser, AssigneeTask
+from db.models import User, Notification, RecipientNotification, WorkspaceUser, AssigneeTask, Task, WorkspaceTaskStatus
 from schemas.user import UserCreate, UserUpdate, DashboardSummary
 from utils.auth import get_password_hash
 
@@ -80,14 +80,57 @@ class UserService:
         if not user:
             return None
 
-        workspace_count = self.db.query(WorkspaceUser).filter_by(userId=user.id).count()
-        task_count = self.db.query(AssigneeTask).filter_by(assigneeId=user.id).count()
-        unread_notifications = self.db.query(RecipientNotification).filter_by(
-            recipientId=user.id, isRead=False
-        ).count()
+        # total workspaces
+        workspace_count = (
+            self.db
+            .query(WorkspaceUser)
+            .filter_by(userId=user.id)
+            .count()
+        )
+
+        done_status = (
+            self.db
+            .query(WorkspaceTaskStatus)
+            .filter(WorkspaceTaskStatus.name == 'Done')
+            .one_or_none()
+        )
+        done_id = done_status.id if done_status else None
+
+        # only tasks not done
+        open_task_count = (
+            self.db
+            .query(AssigneeTask)
+            .join(AssigneeTask.task)  # join into Task
+            .filter(
+                AssigneeTask.assigneeId == user.id,
+                Task.statusId != done_id  # Task not marked Done
+            )
+            .count()
+        )
+
+        # only tasks done
+        completed_task_count = (
+            self.db
+            .query(AssigneeTask)
+            .join(AssigneeTask.task)
+            .filter(
+                AssigneeTask.assigneeId == user.id,
+                Task.statusId == done_id
+            )
+            .count()
+        )
+
+        # unread notifications
+        unread_notifications = (
+            self.db
+            .query(RecipientNotification)
+            .filter_by(recipientId=user.id, isRead=False)
+            .count()
+        )
 
         return DashboardSummary(
             workspaceCount=workspace_count,
-            taskCount=task_count,
+            taskCount=open_task_count,
+            completedTaskCount=completed_task_count,
             unreadNotifications=unread_notifications
         )

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getCurrentUser } from '../utils/auth';
+import { clearAccessToken, getCurrentUser } from '../utils/auth';
 import { UserContext } from './UserContext';
 
 export type User = {
@@ -29,8 +29,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     init();
   }, []);
 
+  const logout = () => {
+    clearAccessToken();
+    setUser(null);
+  };
+
   return (
-    <UserContext.Provider value={{ user, setUser, loading, error }}>
+    <UserContext.Provider value={{ user, setUser, logout, loading, error }}>
       {children}
     </UserContext.Provider>
   );
