@@ -88,22 +88,22 @@ class UserService:
             .count()
         )
 
-        done_status = (
+        rows = (
             self.db
-            .query(WorkspaceTaskStatus)
-            .filter(WorkspaceTaskStatus.name == 'Done')
-            .one_or_none()
+            .query(WorkspaceTaskStatus.id)
+            .filter(WorkspaceTaskStatus.name == 'Completed')
+            .all()
         )
-        done_id = done_status.id if done_status else None
+        done_ids = [row[0] for row in rows]
 
         # only tasks not done
         open_task_count = (
             self.db
             .query(AssigneeTask)
-            .join(AssigneeTask.task)  # join into Task
+            .join(AssigneeTask.task)
             .filter(
                 AssigneeTask.assigneeId == user.id,
-                Task.statusId != done_id  # Task not marked Done
+                Task.statusId.not_in(done_ids)
             )
             .count()
         )
@@ -115,12 +115,11 @@ class UserService:
             .join(AssigneeTask.task)
             .filter(
                 AssigneeTask.assigneeId == user.id,
-                Task.statusId == done_id
+                Task.statusId.in_(done_ids)
             )
             .count()
         )
 
-        # unread notifications
         unread_notifications = (
             self.db
             .query(RecipientNotification)
