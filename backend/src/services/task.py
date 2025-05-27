@@ -4,7 +4,8 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from db.models import Task, Notification, User, RecipientNotification, AssigneeTask, WorkspaceTaskStatus
-from schemas.task import TaskCreate, TaskUpdate, EventTypeEnum
+from schemas.notifications import EventTypeEnum
+from schemas.task import TaskCreate, TaskUpdate
 from websocket import notification_manager
 
 
@@ -78,14 +79,32 @@ class TaskService:
         self.db.commit()
         self.db.refresh(task)
 
+        # for notifying users
+        workspace = task.workspace
+        creator = self.db.query(User).filter(User.id == updatedBy).first()
         current_ids = [a.assigneeId for a in task.assignees]
         recipients = [aid for aid in current_ids if aid != updatedBy]
 
         for event_type, message in events:
-            notif = self.create_notification(task_id, event_type, message, recipients)
+            notif = self.create_notification(
+                taskId=task.id,
+                event_type=event_type,
+                message=message,
+                recipient_ids=recipients,
+                creator_id=updatedBy
+            )
             if recipients:
-                await notification_manager.notify_users(task.id, notif.eventType, recipients)
-
+                await notification_manager.notify_task_event(
+                    notification_id=notif.id,
+                    task_id=task.id,
+                    task_name=task.title,
+                    workspace_id=workspace.id,
+                    workspace_name=workspace.name,
+                    event_type=event_type,
+                    creator_id=creator.id,
+                    creator_name=creator.fullName,
+                    assignee_ids=recipients,
+                )
         return task
 
     def get_task(self, task_id: UUID):
@@ -106,12 +125,14 @@ class TaskService:
             event_type: EventTypeEnum,
             message: str,
             recipient_ids: List[UUID],
+            creator_id: UUID
     ) -> Notification:
         # create the notification record
         notification = Notification(
             message=message,
             eventType=event_type,
             taskId=taskId,
+            creatorId=creator_id
         )
         self.db.add(notification)
         self.db.commit()

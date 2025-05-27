@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 from fastapi import WebSocket
@@ -22,3 +23,8 @@ class ConnectionManager:
     async def broadcast(self, message: str):
         for connection in self.active_connections.values():
             await connection.send_text(message)
+
+    async def send_json(self, user_id: UUID, data: Any):
+        ws = self.active_connections.get(user_id)
+        if ws:
+            await ws.send_json(data)

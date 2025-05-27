@@ -1,4 +1,5 @@
-from typing import List
+# app/notifications/notifications.py
+from typing import List, Set
 from uuid import UUID
 
 from db.models.Notification import EventTypeEnum
@@ -9,8 +10,38 @@ class NotificationManager:
     def __init__(self, manager: ConnectionManager):
         self.manager = manager
 
-    async def notify_users(self, task_id: UUID, event_type: EventTypeEnum, assignee_ids: List[UUID]):
-        # Notify all assignees of the task about the update or creation
-        for assignee_id in assignee_ids:
-            message = f"Task {task_id} has been {event_type}."
-            await self.manager.send_message(assignee_id, message)
+    async def notify_task_event(
+            self,
+            notification_id: UUID,
+            task_id: UUID,
+            task_name: str,
+            workspace_id: UUID,
+            workspace_name: str,
+            event_type: EventTypeEnum,
+            creator_id: UUID,
+            creator_name: str,
+            assignee_ids: List[UUID],
+    ):
+        """
+        Send a rich JSON payload to task creator + assignees.
+        """
+        payload = {
+            "id": str(notification_id),
+            "taskId": str(task_id),
+            "taskName": task_name,
+            "workspaceId": str(workspace_id),
+            "workspaceName": workspace_name,
+            "eventType": event_type.value,
+            "message": f"Task '{task_name}' was {event_type.value.lower().replace('_', ' ')}.",
+            "creatorId": str(creator_id),
+            "creatorName": creator_name,
+            # "notifiedAt": notified_at.isoformat() + "Z",
+        }
+
+        # Collect unique recipients
+        recipients: Set[UUID] = set(assignee_ids)
+        recipients.add(creator_id)
+
+        # Send JSON to each
+        for user_id in recipients:
+            await self.manager.send_json(user_id, payload)

@@ -1,8 +1,8 @@
 import uuid
 from enum import Enum
 
-from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.postgresql import ENUM, UUID, TEXT, TIMESTAMP
+from sqlalchemy import Column, ForeignKey, DateTime
+from sqlalchemy.dialects.postgresql import ENUM, UUID, TEXT
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -26,11 +26,15 @@ class Notification(Base):
     id = Column(UUID, primary_key=True, default=uuid.uuid4)
     message = Column(TEXT, nullable=False)
     eventType = Column(ENUM(EventTypeEnum), nullable=False)
-    createdAt = Column(TIMESTAMP, default=func.now())
+    createdAt = Column(DateTime(timezone=True),
+                       server_default=func.now(),
+                       nullable=False)
 
     # Foreign keys
     taskId = Column(UUID(as_uuid=True), ForeignKey('task.id', ondelete='CASCADE'))
+    creatorId = Column(UUID(as_uuid=True), ForeignKey("user.id", ondelete="SET NULL"), nullable=True)
 
     # Relationship
     task = relationship("Task", back_populates="notifications")
     recipients = relationship("RecipientNotification", back_populates="notification", passive_deletes=True)
+    creator = relationship("User", back_populates="created_notifications")

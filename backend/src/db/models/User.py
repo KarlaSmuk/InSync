@@ -20,3 +20,8 @@ class User(Base):
     assigned_tasks = relationship("AssigneeTask", back_populates="assignee")
     notifications = relationship("RecipientNotification", back_populates="recipient")
     workspace_memberships = relationship("WorkspaceUser", back_populates="user")
+    created_notifications = relationship(
+        "Notification",
+        back_populates="creator",
+        foreign_keys="[Notification.creatorId]",
+    )
