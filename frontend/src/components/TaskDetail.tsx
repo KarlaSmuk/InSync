@@ -1,5 +1,6 @@
-// src/components/TaskDetail.tsx
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+
 import {
   Dialog,
   DialogTitle,
@@ -14,7 +15,6 @@ import {
   Chip,
   Paper,
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
   CircularProgress,
@@ -24,11 +24,9 @@ import {
   Select
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
 import type {
   TaskResponse,
   TaskUpdate,
@@ -37,21 +35,24 @@ import type {
 } from '../api/fastAPI.schemas';
 import { getTask } from '../api/task/task';
 import { getUser } from '../api/user/user';
+import { useUser } from '../hooks/useUser';
 
-interface TaskDetailProps {
+export const TaskDetail = ({
+  open,
+  task,
+  statuses,
+  onClose
+}: {
   open: boolean;
   task: TaskResponse | null;
   statuses: WorkspaceStatusResponse[];
   onClose: () => void;
-}
-
-export const TaskDetail = ({ open, task, statuses, onClose }: TaskDetailProps) => {
+}) => {
   const qc = useQueryClient();
   const { updateTaskApiTaskTaskIdPut } = getTask();
+  const { user: currentUser } = useUser();
   const { getUsersApiUserAllGet } = getUser();
-
-  // fetch all users
-  const { data: allUsers = [], isLoading: usersLoading } = useQuery<UserResponse[]>({
+  const { data: allUsers = [] } = useQuery<UserResponse[]>({
     queryKey: ['allUsers'],
     queryFn: getUsersApiUserAllGet
   });
@@ -65,192 +66,225 @@ export const TaskDetail = ({ open, task, statuses, onClose }: TaskDetailProps) =
     }
   });
 
-  // local state
+  // form state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [statusId, setStatusId] = useState('');
   const [dueDate, setDueDate] = useState<Date | null>(null);
-  const [currentAssignees, setCurrentAssignees] = useState<UserResponse[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [assignees, setAssignees] = useState<UserResponse[]>([]);
+  const [search, setSearch] = useState('');
 
-  // sync incoming task
+  //default values
   useEffect(() => {
     if (!task) return;
-    setTitle(task.title ?? '');
-    setDescription(task.description ?? '');
-    setStatusId(task.status?.id ?? '');
+
+    setTitle(task.title || '');
+    setDescription(task.description || '');
+    setStatusId(task.status?.id || '');
     setDueDate(task.dueDate ? new Date(task.dueDate) : null);
 
-    const initial = (task.assignees ?? [])
-      .map((assignee) =>
-        typeof assignee === 'string'
-          ? allUsers.find((u) => u.id === assignee)
-          : allUsers.find((u) => u.id === assignee.id)
-      )
-      .filter((u): u is UserResponse => Boolean(u));
-    setCurrentAssignees(initial);
-    setSearchQuery('');
+    const initAssignees: UserResponse[] = (task.assignees || [])
+      .map((assignee) => allUsers.find((user: UserResponse) => user.id === assignee.id))
+      .filter((user): user is UserResponse => user !== undefined);
+
+    setAssignees(initAssignees ?? []);
   }, [task, allUsers]);
 
-  // filtered users matching query & not already assigned
-  const filteredUsers = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return [];
+  const filtered = useMemo(() => {
+    const userSearch = search.trim().toLowerCase();
+    if (!userSearch) return [];
     return allUsers
       .filter(
-        (u) =>
-          !currentAssignees.some((ca) => ca.id === u.id) &&
-          (u.username.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+        (user) =>
+          !assignees.some((assignee) => assignee.id === user.id) &&
+          (user.username.toLowerCase().includes(userSearch) ||
+            user.email.toLowerCase().includes(userSearch))
       )
-      .slice(0, 10);
-  }, [allUsers, currentAssignees, searchQuery]);
+      .slice(0, 8); //to stay inside screen if user want to find specific it will enter entire username or email
+  }, [allUsers, assignees, search]);
 
-  const handleAddAssignee = (u: UserResponse) => {
-    setCurrentAssignees((prev) => {
-      if (prev.some((x) => x.id === u.id)) return prev;
-      return [...prev, u];
-    });
-    setSearchQuery('');
+  const addAssignee = (user: UserResponse) => {
+    setAssignees((prev) => [...prev, user]);
+    setSearch('');
   };
 
-  const handleRemoveAssignee = (id: string) => {
-    setCurrentAssignees((prev) => prev.filter((u) => u.id !== id));
-  };
+  const removeAssignee = (id: string) =>
+    setAssignees((prev) => prev.filter((user) => user.id !== id));
 
   const handleSave = () => {
     if (!task) return;
-    const body: Partial<TaskUpdate> = {};
-    if (title) body.title = title;
-    if (description) body.description = description;
-    if (statusId) body.statusId = statusId;
-    body.dueDate = dueDate ? dueDate.toISOString() : null;
-    // send full list of assignees
-    body.assignees = currentAssignees.map((u) => u.id);
-
+    const body: Partial<TaskUpdate> = {
+      title,
+      description,
+      statusId,
+      dueDate: dueDate ? dueDate.toISOString() : null,
+      assignees: assignees.map((user: UserResponse) => user.id)
+    };
     updateTask.mutate({ taskId: task.id, body: body as TaskUpdate });
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ position: 'relative' }}>
-        Edit Task
+      <DialogTitle sx={{ bgcolor: '#1E1E1E', color: '#E0E0E0', px: 3, py: 1.5 }}>
+        <Typography fontSize={'24px'}>Edit Task</Typography>
         <IconButton
-          aria-label="close"
           onClick={onClose}
-          sx={{ position: 'absolute', right: 8, top: 8 }}>
+          sx={{ position: 'absolute', top: 8, right: 8, color: '#E0E0E0' }}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers>
-        <Stack spacing={3}>
-          <TextField
-            label="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            fullWidth
-          />
-
-          <FormControl fullWidth>
-            <InputLabel id="status-label">Status</InputLabel>
-            <Select
-              labelId="status-label"
-              value={statusId}
-              label="Status"
-              onChange={(e) => setStatusId(e.target.value)}>
-              {statuses.map((s) => (
-                <MenuItem key={s.id} value={s.id}>
-                  {s.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Box display="flex" alignItems="center" gap={2}>
-              <DatePicker
-                label="Due Date"
-                format="yyyy-MM-dd"
-                value={dueDate}
-                onChange={(d) => setDueDate(d)}
-                slotProps={{ textField: { fullWidth: true } }}
-              />
-              <Button onClick={() => setDueDate(null)}>Clear</Button>
-            </Box>
-          </LocalizationProvider>
-
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>
-              Assignees
-            </Typography>
-            <Box display="flex" flexWrap="wrap" gap={1}>
-              {currentAssignees.map((u) => (
-                <Chip
-                  key={u.id}
-                  label={u.fullName
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')
-                    .toUpperCase()}
-                  onDelete={() => handleRemoveAssignee(u.id)}
+      <DialogContent dividers sx={{ bgcolor: '#1E1E1E', px: 3, py: 2 }}>
+        <DialogContent
+          sx={{
+            bgcolor: '#1E1E1E',
+            px: 3,
+            py: 2
+          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 3
+            }}>
+            <Box sx={{ flex: 1 }}>
+              <Stack spacing={2}>
+                <TextField
+                  label="Title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  variant="filled"
+                  fullWidth
+                  sx={{
+                    bgcolor: '#2C2C2C',
+                    '& .MuiFilledInput-input': { color: '#E0E0E0' },
+                    '& .MuiInputLabel-root': { color: '#A0A0A0' },
+                    '& .MuiInputLabel-root.Mui-focused': { color: '#2979FF' }
+                  }}
                 />
-              ))}
+
+                <FormControl fullWidth variant="filled">
+                  <InputLabel sx={{ color: '#A0A0A0' }}>Status</InputLabel>
+                  <Select
+                    value={statusId}
+                    onChange={(e) => setStatusId(e.target.value)}
+                    sx={{ bgcolor: '#2C2C2C', color: '#E0E0E0' }}>
+                    {statuses.map((s) => (
+                      <MenuItem key={s.id} value={s.id}>
+                        {s.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    label="Due Date"
+                    value={dueDate}
+                    onChange={(d) => setDueDate(d)}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: 'filled',
+                        sx: {
+                          bgcolor: '#2C2C2C',
+                          '& .MuiFilledInput-input': { color: '#E0E0E0' },
+                          '& .MuiInputLabel-root': { color: '#A0A0A0' }
+                        }
+                      }
+                    }}
+                  />
+                </LocalizationProvider>
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ color: '#A0A0A0', mb: 1 }}>
+                    Assignees
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {assignees.map((assignee: UserResponse) => (
+                      <Chip
+                        key={assignee.id}
+                        label={assignee.fullName
+                          ?.split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()}
+                        onDelete={() => removeAssignee(assignee.id)}
+                        sx={{ bgcolor: '#2C2C2C', color: '#E0E0E0' }}
+                      />
+                    ))}
+                  </Box>
+                  {currentUser && !assignees.some((a) => a.id === currentUser.id) && (
+                    <Button
+                      size="small"
+                      startIcon={<PersonAddIcon />}
+                      onClick={() => addAssignee(currentUser)}
+                      sx={{ textTransform: 'none', color: '#2979FF' }}>
+                      Assign to me
+                    </Button>
+                  )}
+                  <TextField
+                    placeholder="Search users..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    variant="standard"
+                    fullWidth
+                    sx={{ mt: 1, color: '#E0E0E0' }}
+                    autoComplete="off"
+                  />
+                  {filtered.length > 0 && (
+                    <Paper sx={{ maxHeight: 160, overflow: 'auto', mt: 1, bgcolor: '#2C2C2C' }}>
+                      <List dense>
+                        {filtered.map((user: UserResponse) => (
+                          <ListItemButton key={user.id} onClick={() => addAssignee(user)}>
+                            <ListItemText primary={user.fullName} sx={{ color: '#E0E0E0' }} />
+                          </ListItemButton>
+                        ))}
+                      </List>
+                    </Paper>
+                  )}
+                </Box>
+              </Stack>
+            </Box>
+
+            <Box
+              sx={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+              <Typography variant="subtitle2" sx={{ color: '#A0A0A0', mb: 1 }}>
+                Description
+              </Typography>
+              <TextField
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                variant="filled"
+                fullWidth
+                multiline
+                rows={16}
+                sx={{
+                  flex: 1,
+                  bgcolor: '#2C2C2C',
+                  '& .MuiFilledInput-input': { color: '#E0E0E0' },
+                  '& .MuiInputLabel-root': { color: '#A0A0A0' }
+                }}
+              />
             </Box>
           </Box>
-
-          {usersLoading ? (
-            <CircularProgress size={24} />
-          ) : (
-            <Box sx={{ position: 'relative' }}>
-              <TextField
-                fullWidth
-                label="Search users by username or email"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoComplete="off"
-              />
-              {filteredUsers.length > 0 && (
-                <Paper
-                  variant="outlined"
-                  sx={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
-                    maxHeight: 200,
-                    overflowY: 'auto',
-                    zIndex: (theme) => theme.zIndex.modal,
-                    mt: 1
-                  }}>
-                  <List dense>
-                    {filteredUsers.map((u) => (
-                      <ListItem key={u.id} disablePadding>
-                        <ListItemButton onClick={() => handleAddAssignee(u)}>
-                          <ListItemText primary={u.fullName} />
-                        </ListItemButton>
-                      </ListItem>
-                    ))}
-                  </List>
-                </Paper>
-              )}
-            </Box>
-          )}
-
-          <TextField
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            fullWidth
-            multiline
-            rows={4}
-          />
-        </Stack>
+        </DialogContent>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSave} disabled={updateTask.isPending}>
-          {updateTask.isPending ? 'Saving…' : 'Save Changes'}
+      <DialogActions sx={{ bgcolor: '#323232', px: 3, py: 2 }}>
+        <Button onClick={onClose} sx={{ color: '#aaa' }}>
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          disabled={updateTask.isPending}
+          sx={{ bgcolor: '#1e88e5' }}>
+          {updateTask.isPending ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : 'Save'}
         </Button>
       </DialogActions>
     </Dialog>
