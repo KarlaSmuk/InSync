@@ -35,6 +35,21 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface NotificationResponse {
+  id: string;
+  message: string;
+  eventType: EventTypeEnum;
+  createdAt: string;
+  taskId: string;
+  taskName: string;
+  workspaceId: string;
+  workspaceName: string;
+  creatorId: string;
+  creatorName: string;
+  isRead: boolean;
+  notifiedAt: string;
+}
+
 export interface NotificationTaskResponse {
   id: string;
   title: string;

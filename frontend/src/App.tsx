@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import AuthPage from './pages/AuthPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import Workspace from './pages/Workspace';
+import Notifications from './pages/Notifications';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/workspaces/:id" element={<Workspace />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Route>
       </Route>
     </Routes>

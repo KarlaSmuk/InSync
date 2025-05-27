@@ -3,7 +3,7 @@ import type { AxiosRequestConfig } from 'axios';
 import { getAccessToken } from './auth';
 
 const AXIOS_INSTANCE = axios.create({
-  baseURL: import.meta.env.VITE_API_URL
+  baseURL: `http://${import.meta.env.VITE_API_URL}`
 });
 
 export const customInstance = async <T = unknown>(
