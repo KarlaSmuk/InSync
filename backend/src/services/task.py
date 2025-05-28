@@ -42,70 +42,142 @@ class TaskService:
         if not task:
             return None
 
-        # 1) Apply all changes to the task, but *don’t* commit DB yet
+        # for saving events
         events: List[Tuple[EventTypeEnum, str]] = []
+
         if update_data.title is not None and update_data.title != task.title:
+            old = task.title
             task.title = update_data.title
-            events.append((EventTypeEnum.TASK_UPDATED, "Task title updated"))
+            events.append((
+                EventTypeEnum.TASK_TITLE_CHANGED,
+                f"Title changed from “{old}” to “{task.title}”"
+            ))
 
         if update_data.description is not None and update_data.description != task.description:
             task.description = update_data.description
-            events.append((EventTypeEnum.TASK_UPDATED, "Task description updated"))
+            events.append((
+                EventTypeEnum.TASK_DESCRIPTION_CHANGED,
+                "Description updated"
+            ))
 
         if update_data.dueDate is not None and update_data.dueDate != task.dueDate:
+            old = task.dueDate.isoformat() if task.dueDate else None
             task.dueDate = update_data.dueDate
-            events.append((EventTypeEnum.TASK_UPDATED, "Task due date updated"))
+            if old is None:
+                events.append((
+                    EventTypeEnum.TASK_DUE_DATE_CHANGED,
+                    f"Due date set to {task.dueDate.isoformat()}"
+                ))
+            else:
+                events.append((
+                    EventTypeEnum.TASK_DUE_DATE_CHANGED,
+                    f"Due date changed from {old} to {task.dueDate.isoformat()}"
+                ))
 
         if update_data.statusId is not None and update_data.statusId != task.statusId:
+            old_status = task.status.name
             task.statusId = update_data.statusId
-            events.append((EventTypeEnum.TASK_STATUS_CHANGED, "Task status changed"))
+            new_status = self.db.query(WorkspaceTaskStatus).filter(
+                WorkspaceTaskStatus.id == update_data.statusId).first()
+            events.append((
+                EventTypeEnum.TASK_STATUS_CHANGED,
+                f"Status changed from '{old_status}' to '{new_status.name}'"
+            ))
 
         if update_data.assignees is not None:
             old_ids = {a.assigneeId for a in task.assignees}
             new_ids = set(update_data.assignees)
-            # removals
+            actor = self.db.query(User).filter(User.id == updatedBy).first()
+
+            # Unassignments
             for rid in old_ids - new_ids:
                 # remove association
                 self.db.query(AssigneeTask).filter(
                     AssigneeTask.taskId == task.id,
                     AssigneeTask.assigneeId == rid
                 ).delete()
-                events.append((EventTypeEnum.TASK_UNASSIGNED, f"User {rid} unassigned"))
-            # additions
+
+                if rid != updatedBy:
+                    notif = self.create_notification(
+                        taskId=task.id,
+                        event_type=EventTypeEnum.TASK_UNASSIGNED,
+                        message=f"You were unassigned by {actor.username}",
+                        recipient_ids=[rid],
+                        creator_id=updatedBy
+                    )
+                    await notification_manager.notify_task_event(
+                        notification_id=notif.id,
+                        task_id=task.id,
+                        task_name=task.title,
+                        workspace_id=task.workspaceId,
+                        workspace_name=task.workspace.name,
+                        event_type=EventTypeEnum.TASK_UNASSIGNED,
+                        creator_id=updatedBy,
+                        creator_name=actor.username,
+                        assignee_ids=[rid],
+                        notified_at=notif.createdAt
+                    )
+            # Assignments
             for aid in new_ids - old_ids:
                 task.assignees.append(AssigneeTask(assigneeId=aid, taskId=task.id))
-                events.append((EventTypeEnum.TASK_ASSIGNED, f"User {aid} assigned"))
-
+                if aid != updatedBy:
+                    notif = self.create_notification(
+                        taskId=task.id,
+                        event_type=EventTypeEnum.TASK_ASSIGNED,
+                        message=f"You were assigned by {actor.username}",
+                        recipient_ids=[aid],
+                        creator_id=updatedBy
+                    )
+                    await notification_manager.notify_task_event(
+                        notification_id=notif.id,
+                        task_id=task.id,
+                        task_name=task.title,
+                        workspace_id=task.workspaceId,
+                        workspace_name=task.workspace.name,
+                        event_type=EventTypeEnum.TASK_ASSIGNED,
+                        creator_id=updatedBy,
+                        creator_name=actor.username,
+                        assignee_ids=[aid],
+                        notified_at=notif.createdAt
+                    )
         self.db.commit()
         self.db.refresh(task)
 
         # for notifying users
-        workspace = task.workspace
         creator = self.db.query(User).filter(User.id == updatedBy).first()
         current_ids = [a.assigneeId for a in task.assignees]
         recipients = [aid for aid in current_ids if aid != updatedBy]
+        if len(events) > 0:
+            self.db.add(task)
+            self.db.commit()
 
-        for event_type, message in events:
+            if len(events) == 1:
+                evt, msg = events[0]
+            else:
+                evt = EventTypeEnum.TASK_UPDATED
+                msg = "Task updated: " + "; ".join(m for _, m in events)
+
             notif = self.create_notification(
                 taskId=task.id,
-                event_type=event_type,
-                message=message,
+                event_type=evt,
+                message=msg,
                 recipient_ids=recipients,
                 creator_id=updatedBy
             )
-            if recipients:
-                await notification_manager.notify_task_event(
-                    notification_id=notif.id,
-                    task_id=task.id,
-                    task_name=task.title,
-                    workspace_id=workspace.id,
-                    workspace_name=workspace.name,
-                    event_type=event_type,
-                    creator_id=creator.id,
-                    creator_name=creator.fullName,
-                    assignee_ids=recipients,
-                    notified_at=notif.createdAt
-                )
+
+            await notification_manager.notify_task_event(
+                notification_id=notif.id,
+                task_id=task.id,
+                task_name=task.title,
+                workspace_id=task.workspaceId,
+                workspace_name=task.workspace.name,
+                event_type=evt,
+                creator_id=updatedBy,
+                creator_name=creator.username,
+                assignee_ids=recipients,
+                notified_at=notif.createdAt,
+            )
+
         return task
 
     def get_task(self, task_id: UUID):
