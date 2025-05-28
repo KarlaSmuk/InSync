@@ -104,6 +104,7 @@ class TaskService:
                     creator_id=creator.id,
                     creator_name=creator.fullName,
                     assignee_ids=recipients,
+                    notified_at=notif.createdAt
                 )
         return task
 

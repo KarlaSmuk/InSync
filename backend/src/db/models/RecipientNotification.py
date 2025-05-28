@@ -14,6 +14,7 @@ class RecipientNotification(Base):
     isRead = Column(BOOLEAN, default=False)
     notifiedAt = Column(DateTime(timezone=True),
                         server_default=func.now(),
+                        default=func.now(),
                         nullable=False)
 
     # relationships

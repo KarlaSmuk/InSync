@@ -1,4 +1,5 @@
 # app/notifications/notifications.py
+from datetime import datetime
 from typing import List, Set
 from uuid import UUID
 
@@ -21,10 +22,8 @@ class NotificationManager:
             creator_id: UUID,
             creator_name: str,
             assignee_ids: List[UUID],
+            notified_at: datetime,
     ):
-        """
-        Send a rich JSON payload to task creator + assignees.
-        """
         payload = {
             "id": str(notification_id),
             "taskId": str(task_id),
@@ -35,7 +34,7 @@ class NotificationManager:
             "message": f"Task '{task_name}' was {event_type.value.lower().replace('_', ' ')}.",
             "creatorId": str(creator_id),
             "creatorName": creator_name,
-            # "notifiedAt": notified_at.isoformat() + "Z",
+            "notifiedAt": notified_at.isoformat(),
         }
 
         # Collect unique recipients

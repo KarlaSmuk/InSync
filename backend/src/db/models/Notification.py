@@ -28,6 +28,7 @@ class Notification(Base):
     eventType = Column(ENUM(EventTypeEnum), nullable=False)
     createdAt = Column(DateTime(timezone=True),
                        server_default=func.now(),
+                       default=func.now(),
                        nullable=False)
 
     # Foreign keys
