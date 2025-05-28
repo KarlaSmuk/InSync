@@ -18,7 +18,8 @@ export function useTaskNotifications(userId: string | null) {
     let notification: NotificationResponse | null = null;
     console.log(notification)
     if (lastMessage?.data) {
-        notification = lastMessage.data as NotificationResponse;
+        notification = JSON.parse(lastMessage.data) as NotificationResponse;
+        console.log(notification)
     }
 
     return { notification };

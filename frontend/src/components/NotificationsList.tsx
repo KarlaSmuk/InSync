@@ -109,9 +109,7 @@ export function NotificationsList() {
                   primary={
                     <>
                       <Typography variant="subtitle2" color="textSecondary">
-                        {new Date(n.notifiedAt).toLocaleString('hr-HR', {
-                          timeZone: 'Europe/Zagreb'
-                        })}
+                        {new Date(n.notifiedAt).toLocaleString()}
                       </Typography>
                       <Typography variant="h6">
                         {n.workspaceName} &ndash; {n.taskName}
