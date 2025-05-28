@@ -115,7 +115,7 @@ export const TaskDetail = ({ open, task, statuses, onClose, workspaceId }: TaskD
       title,
       description,
       statusId,
-      dueDate: dueDate ? dueDate.toISOString() : null,
+      dueDate: dueDate ? dueDate.toISOString().split('T')[0] : null,
       assignees: assignees.map((user: UserResponse) => user.id)
     };
     updateTask.mutate({ taskId: task.id, body: body as TaskUpdate });
