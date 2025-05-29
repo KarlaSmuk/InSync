@@ -24,10 +24,11 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getWorkspace } from '../api/workspace/workspace';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getNotifications } from '../api/notifications/notifications';
-import { type WorkspaceCreate } from '../api/fastAPI.schemas';
+import { type NotificationResponse, type WorkspaceCreate } from '../api/fastAPI.schemas';
 import CreateWorkspaceDialog from '../components/CreateWorkspaceDialog';
+import { useTaskNotifications } from '../hooks/useTaskNotifications';
 
 const drawerWidth = 240;
 
@@ -82,6 +83,20 @@ export default function DashboardLayout() {
       navigate(`/workspaces/${newWorkspace.id}`);
     }
   });
+
+  //WEB SOCKET hook for live messages
+  //it needs to be here bc this is layout for all pages
+  const { notification: liveNotification } = useTaskNotifications(user!.id);
+
+  useEffect(() => {
+    if (!liveNotification) return;
+
+    //add new message to list of notifications
+    queryClient.setQueryData<NotificationResponse[]>(['notifications'], (old = []) => {
+      if (old.some((n) => n.id === liveNotification.id)) return old;
+      return [liveNotification as NotificationResponse, ...old];
+    });
+  }, [liveNotification, queryClient]);
 
   return (
     <Box sx={{ display: 'flex' }}>
