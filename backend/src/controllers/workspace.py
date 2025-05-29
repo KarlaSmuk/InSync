@@ -29,6 +29,14 @@ def add_workspace_members(request: WorkspaceMembersCreate, db: Session = Depends
     return new_workspace
 
 
+@router.delete("/{workspace_id}/member/{member_id}", response_model=WorkspaceResponse)
+def delete_workspace_member(workspace_id: UUID, member_id: UUID, db: Session = Depends(get_db),
+                            current_user=Depends(get_current_user)):
+    workspace_service = WorkspaceService(db)
+    new_workspace = workspace_service.remove_member(member_id, workspace_id)
+    return new_workspace
+
+
 @router.get("/all", response_model=List[WorkspaceResponse])
 def get_workspaces_by_user(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     workspace_service = WorkspaceService(db)

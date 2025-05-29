@@ -21,19 +21,27 @@ export default function Workspace() {
     getWorkspaceByIdApiWorkspaceWorkspaceIdGet,
     getTasksByWorkspaceApiWorkspaceWorkspaceIdTasksGet,
     getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet,
-    deleteWorkspaceApiWorkspaceDelete
+    deleteWorkspaceApiWorkspaceDelete,
+    deleteWorkspaceMemberApiWorkspaceWorkspaceIdMemberMemberIdDelete
   } = getWorkspace();
   const { createTaskApiTaskPost } = getTask();
 
   const [addingStatusId, setAddingStatusId] = useState<string | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
-  const [openConfirm, setOpenConfirm] = useState(false);
+  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
+  const [openLeaveConfirm, setOpenLeaveConfirm] = useState(false);
 
-  const handleCancel = () => setOpenConfirm(false);
-  const handleConfirm = () => {
+  const handleDeleteCancel = () => setOpenDeleteConfirm(false);
+  const handleDeleteConfirm = () => {
     deleteWorkspaceMutation.mutate({ workspace_id: workspaceId! });
   };
+
+  const handleLeaveCancel = () => setOpenLeaveConfirm(false);
+  const handleLeaveConfirm = () => {
+    leaveWorkspaceMutation.mutate();
+  };
+
   const {
     data: workspace,
     isLoading: isWorkspaceLoading,
@@ -84,6 +92,19 @@ export default function Workspace() {
     },
     onError: (err) => {
       console.error('Failed to delete workspace:', err);
+    }
+  });
+
+  const leaveWorkspaceMutation = useMutation({
+    mutationFn: () =>
+      deleteWorkspaceMemberApiWorkspaceWorkspaceIdMemberMemberIdDelete(workspaceId!, user!.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userWorkspaces'] });
+      queryClient.invalidateQueries({ queryKey: ['workspace', workspaceId, 'members'] });
+      navigate('/');
+    },
+    onError: (err) => {
+      console.error('Failed to leave workspace:', err);
     }
   });
 
@@ -140,8 +161,14 @@ export default function Workspace() {
 
           <Box display={'grid'} gap={1.5}>
             <WorkspaceMemberSelector workspaceId={workspaceId!} />
-
-            <Button variant="outlined" color="error" onClick={() => setOpenConfirm(true)}>
+            <Button variant="contained" color="warning" onClick={() => setOpenLeaveConfirm(true)}>
+              {leaveWorkspaceMutation.isPending ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                'Leave Workspace'
+              )}
+            </Button>
+            <Button variant="contained" color="error" onClick={() => setOpenDeleteConfirm(true)}>
               {deleteWorkspaceMutation.isPending ? (
                 <CircularProgress size={20} color="inherit" />
               ) : (
@@ -150,12 +177,20 @@ export default function Workspace() {
             </Button>
           </Box>
           <ConfirmDialog
-            open={openConfirm}
+            open={openDeleteConfirm}
             title="Delete Workspace"
-            description="Are you sure you want to delete this workspace?"
+            description="Are you sure you want to leave this workspace?"
             isLoading={deleteWorkspaceMutation.isPending}
-            onCancel={handleCancel}
-            onConfirm={handleConfirm}
+            onCancel={handleDeleteCancel}
+            onConfirm={handleDeleteConfirm}
+          />
+          <ConfirmDialog
+            open={openLeaveConfirm}
+            title="Leave Workspace"
+            description="Are you sure you want to delete this workspace?"
+            isLoading={leaveWorkspaceMutation.isPending}
+            onCancel={handleLeaveCancel}
+            onConfirm={handleLeaveConfirm}
           />
         </Box>
 

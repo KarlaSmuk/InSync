@@ -1,6 +1,14 @@
-export default {
+import path from 'path';
+import { defineConfig } from 'orval';
+import * as dotenv from 'dotenv';
+
+dotenv.config({
+  path: path.resolve(__dirname, '.env')
+});
+
+export default defineConfig({
   insync: {
-    input: 'http://localhost:8000/openapi.json',
+    input: `http://${process.env.VITE_API_URL}/openapi.json`,
     output: {
       mode: 'tags-split',
       target: './src/api/',
@@ -13,4 +21,4 @@ export default {
       }
     }
   }
-};
+});

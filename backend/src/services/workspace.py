@@ -47,6 +47,21 @@ class WorkspaceService:
         self.db.commit()
         return self.get_workspace_by_id(workspaceId)
 
+    def remove_member(self, userId: UUID, workspaceId: UUID):
+        workspace_user = (
+            self.db.query(WorkspaceUser)
+            .filter(
+                WorkspaceUser.workspaceId == workspaceId,
+                WorkspaceUser.userId == userId,
+            )
+            .one_or_none()
+        )
+
+        self.db.delete(workspace_user)
+        self.db.commit()
+
+        return self.get_workspace_by_id(workspaceId)
+
     def get_workspace_by_id(self, workspace_id: UUID):
         return self.db.query(Workspace).filter(Workspace.id == workspace_id).first()
 
