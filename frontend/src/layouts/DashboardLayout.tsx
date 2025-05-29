@@ -1,7 +1,9 @@
 import {
+  Alert,
   Avatar,
   Badge,
   Box,
+  Button,
   Collapse,
   Drawer,
   IconButton,
@@ -10,6 +12,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Snackbar,
   Toolbar,
   Typography
 } from '@mui/material';
@@ -87,6 +90,7 @@ export default function DashboardLayout() {
   //WEB SOCKET hook for live messages
   //it needs to be here bc this is layout for all pages
   const { notification: liveNotification } = useTaskNotifications(user!.id);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   useEffect(() => {
     if (!liveNotification) return;
@@ -96,6 +100,7 @@ export default function DashboardLayout() {
     //using setQueryData to update local data and not calling backend
     //add new message to list of notifications
     queryClient.setQueryData<NotificationResponse[]>(['notifications'], (old = []) => {
+      console.log(liveNotification.id);
       const alreadyExists = old.some((n) => n.id === liveNotification.id);
       isNew = !alreadyExists;
       return alreadyExists ? old : [liveNotification, ...old];
@@ -104,11 +109,37 @@ export default function DashboardLayout() {
     if (isNew) {
       queryClient.setQueryData<number>(['notificationsCount'], (old = 0) => old + 1);
       queryClient.invalidateQueries({ queryKey: ['Dash'] });
+
+      setOpenSnackbar(true);
     }
   }, [liveNotification, queryClient]);
 
   return (
     <Box sx={{ display: 'flex' }}>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+        <Alert
+          severity="info"
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => {
+                navigate(`/notifications`);
+                setOpenSnackbar(false);
+              }}>
+              GO
+            </Button>
+          }
+          onClose={() => setOpenSnackbar(false)}
+          sx={{ width: '100%' }}>
+          You have a new notification.
+        </Alert>
+      </Snackbar>
+
       <Drawer
         variant="permanent"
         sx={{

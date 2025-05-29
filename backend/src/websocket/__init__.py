@@ -15,7 +15,6 @@ async def websocket_endpoint(websocket: WebSocket, user_id: UUID):
     await manager.connect(websocket, user_id)
     try:
         while True:
-            # Wait for messages (if needed for other functionality)
             await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(user_id)
