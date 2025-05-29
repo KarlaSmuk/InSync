@@ -103,6 +103,7 @@ export default function DashboardLayout() {
     // add + 1 to notifications count
     if (isNew) {
       queryClient.setQueryData<number>(['notificationsCount'], (old = 0) => old + 1);
+      queryClient.invalidateQueries({ queryKey: ['Dash'] });
     }
   }, [liveNotification, queryClient]);
 
