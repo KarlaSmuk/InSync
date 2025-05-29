@@ -18,11 +18,18 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
       markNotificationReadApiNotificationsNotificationIdReadPatch(notificationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notificationsCount'] });
     }
   });
 
-  const handleClick = () => {
-    navigate(`/workspaces/${notification.workspaceId}`);
+  const handleClick = async () => {
+    try {
+      //await to invalidate queries before navigation
+      await markReadMutation.mutateAsync(notification.id);
+      navigate(`/workspaces/${notification.workspaceId}`);
+    } catch {
+      console.error('Failed to mark read before navigation');
+    }
   };
 
   return (
@@ -37,7 +44,10 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
             overflow: 'hidden',
             cursor: 'pointer'
           }}
-          onClick={handleClick}>
+          onClick={(e) => {
+            e.preventDefault();
+            handleClick();
+          }}>
           <Box sx={{ flex: 1, position: 'relative' }}>
             <CardContent sx={{ p: 1, pb: 0.5, '&:last-child': { pb: 0.5 } }}>
               <Typography variant="caption" color="textSecondary">
