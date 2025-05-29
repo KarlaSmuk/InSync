@@ -91,14 +91,19 @@ export default function DashboardLayout() {
   useEffect(() => {
     if (!liveNotification) return;
 
+    let isNew = true;
+
     //using setQueryData to update local data and not calling backend
     //add new message to list of notifications
     queryClient.setQueryData<NotificationResponse[]>(['notifications'], (old = []) => {
-      if (old.some((n) => n.id === liveNotification.id)) return old;
-      return [liveNotification as NotificationResponse, ...old];
+      const alreadyExists = old.some((n) => n.id === liveNotification.id);
+      isNew = !alreadyExists;
+      return alreadyExists ? old : [liveNotification, ...old];
     });
     // add + 1 to notifications count
-    queryClient.setQueryData<number>(['notificationsCount'], (old = 0) => old + 1);
+    if (isNew) {
+      queryClient.setQueryData<number>(['notificationsCount'], (old = 0) => old + 1);
+    }
   }, [liveNotification, queryClient]);
 
   return (
