@@ -65,3 +65,13 @@ class NotificationService:
         self.db.commit()
 
         return rn
+
+    def get_unred_notifications_count(self, user_id: UUID):
+        unread_notifications = (
+            self.db
+            .query(RecipientNotification)
+            .filter_by(recipientId=user_id, isRead=False)
+            .count()
+        )
+
+        return unread_notifications

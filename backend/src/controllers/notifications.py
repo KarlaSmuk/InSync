@@ -32,3 +32,12 @@ def mark_notification_read(
 
     if result is None:
         raise HTTPException(status_code=404, detail="Notification not found")
+
+
+@router.get("/unread/count", response_model=int)
+def count_unread_notifications(
+        db: Session = Depends(get_db),
+        current_user=Depends(get_current_user)
+) -> int:
+    notificationService = NotificationService(db)
+    return notificationService.get_unred_notifications_count(current_user.id)
