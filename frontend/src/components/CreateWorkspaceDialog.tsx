@@ -40,12 +40,15 @@ export default function CreateWorkspaceDialog({
       status: status
     });
     onClose();
+    setName('');
+    setDescription('');
+    setStatus(WorkspaceStatusEnum.ACTIVE);
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>New Workspace</DialogTitle>
-      <DialogContent dividers>
+      <DialogTitle sx={{ bgcolor: '#1E1E1E' }}>New Workspace</DialogTitle>
+      <DialogContent dividers sx={{ bgcolor: '#1E1E1E' }}>
         <TextField
           autoFocus
           margin="normal"
@@ -80,7 +83,7 @@ export default function CreateWorkspaceDialog({
         </TextField>
       </DialogContent>
 
-      <DialogActions>
+      <DialogActions sx={{ bgcolor: '#1E1E1E' }}>
         <Button onClick={onClose} disabled={loading}>
           Cancel
         </Button>

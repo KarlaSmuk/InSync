@@ -87,9 +87,9 @@ export default function WorkspaceMemberSelector({ workspaceId }: WorkspaceMember
       </Button>
 
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>Add Workspace Members</DialogTitle>
+        <DialogTitle sx={{ bgcolor: '#1E1E1E' }}>Add Workspace Members</DialogTitle>
 
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ bgcolor: '#1E1E1E' }}>
           <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {currentMembers.map((u) => (
               <Chip key={u.id} label={u.username} disabled />
@@ -121,7 +121,7 @@ export default function WorkspaceMemberSelector({ workspaceId }: WorkspaceMember
           />
         </DialogContent>
 
-        <DialogActions>
+        <DialogActions sx={{ bgcolor: '#1E1E1E' }}>
           <Button onClick={handleClose}>Cancel</Button>
           <Button variant="contained" onClick={handleSave} disabled={selected.length === 0}>
             Save
