@@ -96,11 +96,12 @@ export function NotificationsList() {
                 secondaryAction={
                   !n.isRead && (
                     <Button
+                      key={n.id}
                       variant="contained"
                       size="small"
                       onClick={() => markReadMutation.mutate(n.id)}
                       disabled={markReadMutation.isPending}
-                      sx={{ mr: 1 }}>
+                      sx={{ mb: 10 }}>
                       {markReadMutation.isPending ? 'Marking…' : 'Mark read'}
                     </Button>
                   )
@@ -109,7 +110,13 @@ export function NotificationsList() {
                   primary={
                     <>
                       <Typography variant="subtitle2" color="textSecondary">
-                        {new Date(n.notifiedAt).toLocaleString()}
+                        {new Date(n.notifiedAt).toLocaleString(undefined, {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </Typography>
                       <Typography variant="h6">
                         {n.workspaceName} &ndash; {n.taskName}
@@ -122,7 +129,7 @@ export function NotificationsList() {
                         {n.message}
                       </Typography>
                       <Typography variant="caption" color="textSecondary">
-                        by {n.creatorName} | event: {n.eventType}
+                        by {n.creatorName}
                       </Typography>
                     </>
                   }

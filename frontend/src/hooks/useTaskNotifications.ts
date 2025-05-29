@@ -13,13 +13,11 @@ export function useTaskNotifications(userId: string | null) {
         retryOnError: true,
         reconnectInterval: 3000,
     });
-    console.log(lastMessage)
 
     let notification: NotificationResponse | null = null;
     console.log(notification)
     if (lastMessage?.data) {
         notification = JSON.parse(lastMessage.data) as NotificationResponse;
-        console.log(notification)
     }
 
     return { notification };
