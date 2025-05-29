@@ -58,7 +58,15 @@ export const TaskItem = ({ task }: TaskItemProps) => {
         }}>
         <Typography>{task.title}</Typography>
         <Typography variant="body2" color="text.secondary">
-          {task.assignees?.map((a) => a.fullName).join(', ') || '—'}
+          {task.assignees
+            ?.map((a) =>
+              a.fullName
+                ?.split(' ')
+                .map((n) => n[0])
+                .join('')
+                .toUpperCase()
+            )
+            .join(', ') || '—'}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {task.dueDate ?? '—'}

@@ -86,7 +86,12 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
               )}
 
               <Typography variant="caption" color="textSecondary">
-                by {notification.creatorName}
+                by{' '}
+                {notification.creatorName
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .toUpperCase()}
               </Typography>
             </>
           }
