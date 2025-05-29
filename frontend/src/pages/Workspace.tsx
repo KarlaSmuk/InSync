@@ -184,7 +184,7 @@ export default function Workspace() {
           <ConfirmDialog
             open={openDeleteConfirm}
             title="Delete Workspace"
-            description="Are you sure you want to leave this workspace?"
+            description="Are you sure you want to delete this workspace?"
             isLoading={deleteWorkspaceMutation.isPending}
             onCancel={handleDeleteCancel}
             onConfirm={handleDeleteConfirm}
@@ -192,7 +192,7 @@ export default function Workspace() {
           <ConfirmDialog
             open={openLeaveConfirm}
             title="Leave Workspace"
-            description="Are you sure you want to delete this workspace?"
+            description="Are you sure you want to leave this workspace?"
             isLoading={leaveWorkspaceMutation.isPending}
             onCancel={handleLeaveCancel}
             onConfirm={handleLeaveConfirm}
