@@ -1,7 +1,8 @@
-import { Box, Button, Divider, ListItem, ListItemText, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, Divider, ListItem, Typography } from '@mui/material';
 import type { NotificationResponse } from '../api/fastAPI.schemas';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { getNotifications } from '../api/notifications/notifications';
+import { useNavigate } from 'react-router-dom';
 
 interface NotificationItemProps {
   notification: NotificationResponse;
@@ -9,6 +10,7 @@ interface NotificationItemProps {
 
 export const NotificationItem = ({ notification }: NotificationItemProps) => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { markNotificationReadApiNotificationsNotificationIdReadPatch } = getNotifications();
 
   const markReadMutation = useMutation<void, Error, string>({
@@ -19,38 +21,26 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
     }
   });
 
+  const handleClick = () => {
+    navigate(`/workspaces/${notification.workspaceId}`);
+  };
+
   return (
     <Box key={notification.id}>
-      <ListItem
-        alignItems="flex-start"
-        sx={{
-          backgroundColor: notification.isRead ? 'action.hover' : 'background.paper',
-          borderLeft: 4,
-          borderColor: notification.isRead ? 'grey.500' : 'primary.main',
-          pl: 2,
-          pr: 10,
-          py: 1.5,
-          '& .MuiListItemSecondaryAction-root': {
-            top: '24px',
-            right: '12px'
-          }
-        }}
-        secondaryAction={
-          !notification.isRead && (
-            <Button
-              key={notification.id}
-              variant="contained"
-              size="small"
-              onClick={() => markReadMutation.mutate(notification.id)}
-              disabled={markReadMutation.isPending}>
-              {markReadMutation.isPending ? 'Marking…' : 'Mark read'}
-            </Button>
-          )
-        }>
-        <ListItemText
-          primary={
-            <>
-              <Typography variant="subtitle2" color="textSecondary">
+      <ListItem disableGutters sx={{ mb: 1 }}>
+        <Card
+          elevation={10}
+          sx={{
+            display: 'flex',
+            width: '100%',
+            borderRadius: 1,
+            overflow: 'hidden',
+            cursor: 'pointer'
+          }}
+          onClick={handleClick}>
+          <Box sx={{ flex: 1, position: 'relative' }}>
+            <CardContent sx={{ p: 1, pb: 0.5, '&:last-child': { pb: 0.5 } }}>
+              <Typography variant="caption" color="textSecondary">
                 {new Date(notification.notifiedAt).toLocaleString(undefined, {
                   day: '2-digit',
                   month: '2-digit',
@@ -59,45 +49,50 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
                   minute: '2-digit'
                 })}
               </Typography>
-              <Typography variant="h6">
-                {notification.workspaceName} &ndash; {notification.taskName}
+              <Typography variant="subtitle1" fontWeight="medium">
+                {notification.workspaceName} – {notification.taskName}
               </Typography>
-            </>
-          }
-          secondary={
-            <>
-              {notification.message.includes(';') ? (
-                (() => {
-                  const notif = notification.message.split(';');
-                  return (
-                    <Box>
-                      {notif.map((message, index) => (
-                        <Typography key={index} variant="body1" color="textPrimary">
-                          {message}
-                        </Typography>
-                      ))}
-                    </Box>
-                  );
-                })()
-              ) : (
-                <Typography variant="body1" color="textPrimary">
-                  {notification.message}
-                </Typography>
-              )}
-
+              <Box sx={{ pt: 0.5 }}>
+                {notification.message.split(';').map((line, idx) => (
+                  <Typography key={idx} variant="body2" color="textPrimary">
+                    {line}
+                  </Typography>
+                ))}
+              </Box>
               <Typography variant="caption" color="textSecondary">
-                by{' '}
+                by
                 {notification.creatorName
                   .split(' ')
                   .map((n) => n[0])
                   .join('')
                   .toUpperCase()}
               </Typography>
-            </>
-          }
-        />
+            </CardContent>
+            {!notification.isRead && (
+              <Button
+                variant="outlined"
+                color="warning"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  markReadMutation.mutate(notification.id);
+                }}
+                disabled={markReadMutation.isPending}
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  minWidth: 0,
+                  padding: '2px 6px',
+                  cursor: 'pointer'
+                }}>
+                {markReadMutation.isPending ? 'Marking…' : 'Mark read'}
+              </Button>
+            )}
+          </Box>
+        </Card>
       </ListItem>
-      <Divider component="li" />
+      <Divider component="li" sx={{ my: 0.5 }} />
     </Box>
   );
 };

@@ -25,6 +25,7 @@ export function NotificationsList() {
 
   //web socket hook for live messages
   const { notification: liveNotification } = useTaskNotifications(userId);
+
   useEffect(() => {
     if (!liveNotification) return;
 
@@ -51,7 +52,7 @@ export function NotificationsList() {
   }
 
   return (
-    <Paper sx={{ p: 3, maxWidth: 640, mx: 'auto', mt: 2 }}>
+    <Paper sx={{ p: 3, mt: 2 }}>
       <Typography variant="h6" gutterBottom>
         Notifications
       </Typography>
