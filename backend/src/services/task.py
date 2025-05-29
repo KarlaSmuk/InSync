@@ -157,7 +157,7 @@ class TaskService:
                 evt, msg = events[0]
             else:
                 evt = EventTypeEnum.TASK_UPDATED
-                msg = "Task updated: " + "; ".join(m for _, m in events)
+                msg = "; ".join(m for _, m in events)
 
             notif = self.create_notification(
                 taskId=task.id,
