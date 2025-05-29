@@ -37,6 +37,18 @@ const markNotificationReadApiNotificationsNotificationIdReadPatch = (
     },
       options);
     }
-  return {listUnreadNotificationsApiNotificationsUnreadGet,markNotificationReadApiNotificationsNotificationIdReadPatch}};
+  /**
+ * @summary Count Unread Notifications
+ */
+const countUnreadNotificationsApiNotificationsUnreadCountGet = (
+    
+ options?: SecondParameter<typeof customInstance>,) => {
+      return customInstance<number>(
+      {url: `/api/notifications/unread/count`, method: 'GET'
+    },
+      options);
+    }
+  return {listUnreadNotificationsApiNotificationsUnreadGet,markNotificationReadApiNotificationsNotificationIdReadPatch,countUnreadNotificationsApiNotificationsUnreadCountGet}};
 export type ListUnreadNotificationsApiNotificationsUnreadGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getNotifications>['listUnreadNotificationsApiNotificationsUnreadGet']>>>
 export type MarkNotificationReadApiNotificationsNotificationIdReadPatchResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getNotifications>['markNotificationReadApiNotificationsNotificationIdReadPatch']>>>
+export type CountUnreadNotificationsApiNotificationsUnreadCountGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getNotifications>['countUnreadNotificationsApiNotificationsUnreadCountGet']>>>

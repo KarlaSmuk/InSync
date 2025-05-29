@@ -1,8 +1,11 @@
 import { useMemo } from 'react';
 import useWebSocket from 'react-use-websocket';
 import type { NotificationResponse } from '../api/fastAPI.schemas';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function useTaskNotifications(userId: string | null) {
+    const queryClient = useQueryClient();
+
     const socketUrl = useMemo(() => {
         if (!userId) return null;
         const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -15,9 +18,9 @@ export function useTaskNotifications(userId: string | null) {
     });
 
     let notification: NotificationResponse | null = null;
-    console.log(notification)
     if (lastMessage?.data) {
         notification = JSON.parse(lastMessage.data) as NotificationResponse;
+        queryClient.invalidateQueries({ queryKey: ['notificationsCount'] })
     }
 
     return { notification };

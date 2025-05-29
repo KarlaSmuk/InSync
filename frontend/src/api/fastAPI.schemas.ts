@@ -11,21 +11,6 @@ export interface DashboardSummary {
   unreadNotifications: number;
 }
 
-export type EventTypeEnum = typeof EventTypeEnum[keyof typeof EventTypeEnum];
-
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const EventTypeEnum = {
-  TASK_CREATED: 'TASK_CREATED',
-  TASK_UPDATED: 'TASK_UPDATED',
-  TASK_ASSIGNED: 'TASK_ASSIGNED',
-  TASK_UNASSIGNED: 'TASK_UNASSIGNED',
-  TASK_DELETED: 'TASK_DELETED',
-  TASK_STATUS_CHANGED: 'TASK_STATUS_CHANGED',
-  TASK_DUE_SOON: 'TASK_DUE_SOON',
-  TASK_COMPLETED: 'TASK_COMPLETED',
-} as const;
-
 export interface HTTPValidationError {
   detail?: ValidationError[];
 }
@@ -38,7 +23,7 @@ export interface LoginRequest {
 export interface NotificationResponse {
   id: string;
   message: string;
-  eventType: EventTypeEnum;
+  eventType: SchemasNotificationsEventTypeEnum;
   createdAt: string;
   taskId: string;
   taskName: string;
@@ -133,7 +118,7 @@ export interface UserCreate {
 export interface UserNotificationResponse {
   id: string;
   message: string;
-  eventType: EventTypeEnum;
+  eventType: DbModelsNotificationEventTypeEnum;
   createdAt: string;
   task: NotificationTaskResponse;
 }
@@ -193,6 +178,37 @@ export interface WorkspaceStatusResponse {
   id: string;
   name: string;
 }
+
+export type DbModelsNotificationEventTypeEnum = typeof DbModelsNotificationEventTypeEnum[keyof typeof DbModelsNotificationEventTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const DbModelsNotificationEventTypeEnum = {
+  TASK_CREATED: 'TASK_CREATED',
+  TASK_UPDATED: 'TASK_UPDATED',
+  TASK_ASSIGNED: 'TASK_ASSIGNED',
+  TASK_UNASSIGNED: 'TASK_UNASSIGNED',
+  TASK_DELETED: 'TASK_DELETED',
+  TASK_STATUS_CHANGED: 'TASK_STATUS_CHANGED',
+  TASK_DUE_SOON: 'TASK_DUE_SOON',
+  TASK_COMPLETED: 'TASK_COMPLETED',
+} as const;
+
+export type SchemasNotificationsEventTypeEnum = typeof SchemasNotificationsEventTypeEnum[keyof typeof SchemasNotificationsEventTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SchemasNotificationsEventTypeEnum = {
+  TASK_UPDATED: 'TASK_UPDATED',
+  TASK_ASSIGNED: 'TASK_ASSIGNED',
+  TASK_UNASSIGNED: 'TASK_UNASSIGNED',
+  TASK_TITLE_CHANGED: 'TASK_TITLE_CHANGED',
+  TASK_DELETED: 'TASK_DELETED',
+  TASK_STATUS_CHANGED: 'TASK_STATUS_CHANGED',
+  TASK_DUE_DATE_CHANGED: 'TASK_DUE_DATE_CHANGED',
+  TASK_COMPLETED: 'TASK_COMPLETED',
+  TASK_DESCRIPTION_CHANGED: 'TASK_DESCRIPTION_CHANGED',
+} as const;
 
 export type DeleteWorkspaceApiWorkspaceDeleteParams = {
 workspace_id: string;

@@ -1,5 +1,6 @@
 import {
   Avatar,
+  Badge,
   Box,
   Collapse,
   Drawer,
@@ -23,6 +24,7 @@ import { useUser } from '../hooks/useUser';
 import { getWorkspace } from '../api/workspace/workspace';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { getNotifications } from '../api/notifications/notifications';
 
 const drawerWidth = 240;
 
@@ -30,11 +32,17 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const { user, logout } = useUser();
   const { getWorkspacesByUserApiWorkspaceAllGet } = getWorkspace();
+  const { countUnreadNotificationsApiNotificationsUnreadCountGet } = getNotifications();
   const [openWorkspaces, setOpenWorkspaces] = useState(false);
 
   const { data: workspaces, isLoading } = useQuery({
     queryKey: ['userWorkspaces'],
     queryFn: getWorkspacesByUserApiWorkspaceAllGet
+  });
+
+  const { data: unreadCount } = useQuery({
+    queryKey: ['notificationsCount'],
+    queryFn: countUnreadNotificationsApiNotificationsUnreadCountGet
   });
 
   const initials = user?.fullName
@@ -86,7 +94,19 @@ export default function DashboardLayout() {
                 <ListItemButton
                   onClick={onClick}
                   sx={{ px: 3, py: 1.75, '&:hover': { bgcolor: '#374151' } }}>
-                  <ListItemIcon sx={{ color: '#f1f5f9' }}>{icon}</ListItemIcon>
+                  {text == 'Notifications' ? (
+                    <ListItemIcon sx={{ color: '#f1f5f9' }}>
+                      <Badge
+                        badgeContent={unreadCount}
+                        color="error"
+                        overlap="circular"
+                        invisible={unreadCount === 0}>
+                        <NotificationsIcon />
+                      </Badge>
+                    </ListItemIcon>
+                  ) : (
+                    <ListItemIcon sx={{ color: '#f1f5f9' }}>{icon}</ListItemIcon>
+                  )}
                   <ListItemText primary={text} sx={{ ml: 1 }} />
                   {collapsible &&
                     (open ? (
@@ -112,10 +132,7 @@ export default function DashboardLayout() {
                           <ListItemButton
                             onClick={() => navigate(`/workspaces/${ws.id}`)}
                             sx={{ pl: 6, py: 1.25, '&:hover': { bgcolor: '#374151' } }}>
-                            <ListItemText
-                              primary={ws.name}
-                              primaryTypographyProps={{ noWrap: true, sx: { color: '#f1f5f9' } }}
-                            />
+                            <ListItemText primary={ws.name} />
                           </ListItemButton>
                         </ListItem>
                       ))
