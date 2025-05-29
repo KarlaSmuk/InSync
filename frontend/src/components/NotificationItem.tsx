@@ -59,18 +59,18 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
                   minute: '2-digit'
                 })}
               </Typography>
-              <Typography variant="subtitle1" fontWeight="medium">
+              <Typography variant="subtitle1" maxWidth={'200px'}>
                 {notification.workspaceName} – {notification.taskName}
               </Typography>
-              <Box sx={{ pt: 0.5 }}>
+              <Box sx={{ pt: 0.5, display: 'flex', flexDirection: 'column' }}>
                 {notification.message.split(';').map((line, idx) => (
-                  <Typography key={idx} variant="body2" color="textPrimary">
+                  <Typography key={idx} variant="caption" color="textPrimary">
                     {line}
                   </Typography>
                 ))}
               </Box>
               <Typography variant="caption" color="textSecondary">
-                by
+                by{' '}
                 {notification.creatorName
                   .split(' ')
                   .map((n) => n[0])

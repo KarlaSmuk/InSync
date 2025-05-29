@@ -65,8 +65,8 @@ export const TaskDetail = ({ open, task, statuses, onClose, workspaceId }: TaskD
   });
 
   // form state
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState<string | undefined>(undefined);
+  const [description, setDescription] = useState<string | undefined>(undefined);
   const [statusId, setStatusId] = useState('');
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [assignees, setAssignees] = useState<UserResponse[]>([]);
@@ -76,8 +76,8 @@ export const TaskDetail = ({ open, task, statuses, onClose, workspaceId }: TaskD
   useEffect(() => {
     if (!task) return;
 
-    setTitle(task.title || '');
-    setDescription(task.description || '');
+    setTitle(task.title || undefined);
+    setDescription(task.description || undefined);
     setStatusId(task.status?.id || '');
     setDueDate(task.dueDate ? new Date(task.dueDate) : null);
 

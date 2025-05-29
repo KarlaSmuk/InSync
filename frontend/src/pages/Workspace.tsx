@@ -155,9 +155,14 @@ export default function Workspace() {
           boxShadow: 3
         }}>
         <Box display={'flex'} justifyContent={'space-between'}>
-          <Typography variant="h4" fontWeight={700} color="#1e293b" gutterBottom>
-            {workspace?.name}
-          </Typography>
+          <Box>
+            <Typography variant="h4" fontWeight={700} color="#1e293b" gutterBottom>
+              {workspace?.name}
+            </Typography>
+            <Typography variant="body2" color="#1e293b">
+              {workspace?.description}
+            </Typography>
+          </Box>
 
           <Box display={'grid'} gap={1.5}>
             <WorkspaceMemberSelector workspaceId={workspaceId!} />
