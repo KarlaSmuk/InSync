@@ -149,6 +149,7 @@ class TaskService:
         creator = self.db.query(User).filter(User.id == updatedBy).first()
         current_ids = [a.assigneeId for a in task.assignees]
         recipients = [aid for aid in current_ids if aid != updatedBy]
+
         if len(events) > 0:
             self.db.add(task)
             self.db.commit()
@@ -159,27 +160,28 @@ class TaskService:
                 evt = EventTypeEnum.TASK_UPDATED
                 msg = "; ".join(m for _, m in events)
 
-            notif = self.create_notification(
-                taskId=task.id,
-                event_type=evt,
-                message=msg,
-                recipient_ids=recipients,
-                creator_id=updatedBy
-            )
+            if len(recipients) > 0:
+                notif = self.create_notification(
+                    taskId=task.id,
+                    event_type=evt,
+                    message=msg,
+                    recipient_ids=recipients,
+                    creator_id=updatedBy
+                )
 
-            await notification_manager.notify_task_event(
-                notification_id=notif.id,
-                task_id=task.id,
-                task_name=task.title,
-                workspace_id=task.workspaceId,
-                workspace_name=task.workspace.name,
-                event_type=evt,
-                message=notif.message,
-                creator_id=updatedBy,
-                creator_name=creator.fullName,
-                assignee_ids=recipients,
-                notified_at=notif.createdAt,
-            )
+                await notification_manager.notify_task_event(
+                    notification_id=notif.id,
+                    task_id=task.id,
+                    task_name=task.title,
+                    workspace_id=task.workspaceId,
+                    workspace_name=task.workspace.name,
+                    event_type=evt,
+                    message=notif.message,
+                    creator_id=updatedBy,
+                    creator_name=creator.fullName,
+                    assignee_ids=recipients,
+                    notified_at=notif.createdAt,
+                )
 
         return task
 

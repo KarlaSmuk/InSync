@@ -38,9 +38,7 @@ class NotificationManager:
             "notifiedAt": notified_at.isoformat(),
         }
 
-        # Collect unique recipients
         recipients: Set[UUID] = set(assignee_ids)
-        recipients.add(creator_id)
 
         # Send JSON to each
         for user_id in recipients:
