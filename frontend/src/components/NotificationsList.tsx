@@ -1,58 +1,39 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { NotificationResponse } from '../api/fastAPI.schemas';
 import { useUser } from '../hooks/useUser';
 import { getNotifications } from '../api/notifications/notifications';
-import {
-  Box,
-  CircularProgress,
-  Alert,
-  Button,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  Typography
-} from '@mui/material';
-import React, { useEffect } from 'react';
+import { Box, CircularProgress, Alert, List, Paper, Typography } from '@mui/material';
+import { useEffect } from 'react';
 import { useTaskNotifications } from '../hooks/useTaskNotifications';
+import { NotificationItem } from './NotificationItem';
 
 export function NotificationsList() {
   const { user } = useUser();
   const userId = user?.id ?? '';
   const queryClient = useQueryClient();
-  const {
-    listUnreadNotificationsApiNotificationsUnreadGet,
-    markNotificationReadApiNotificationsNotificationIdReadPatch
-  } = getNotifications();
+  const { listUnreadNotificationsApiNotificationsUnreadGet } = getNotifications();
 
+  //to get all previous unread notifications
   const {
     data: notifications = [],
     isLoading,
     error
   } = useQuery<NotificationResponse[], Error>({
-    queryKey: ['notifications', userId],
+    queryKey: ['notifications'],
     queryFn: () => listUnreadNotificationsApiNotificationsUnreadGet()
   });
 
-  const markReadMutation = useMutation<void, Error, string>({
-    mutationFn: (notificationId: string) =>
-      markNotificationReadApiNotificationsNotificationIdReadPatch(notificationId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications', userId] });
-    }
-  });
-
-  //WS hook for live pushes
+  //web socket hook for live messages
   const { notification: liveNotification } = useTaskNotifications(userId);
   useEffect(() => {
     if (!liveNotification) return;
 
-    queryClient.setQueryData<NotificationResponse[]>(['notifications', userId], (old = []) => {
+    //add new message to list of notifications
+    queryClient.setQueryData<NotificationResponse[]>(['notifications'], (old = []) => {
       if (old.some((n) => n.id === liveNotification.id)) return old;
       return [liveNotification as NotificationResponse, ...old];
     });
-  }, [liveNotification, queryClient, userId]);
+  }, [liveNotification, queryClient]);
 
   if (isLoading) {
     return (
@@ -82,61 +63,7 @@ export function NotificationsList() {
       ) : (
         <List disablePadding>
           {notifications.map((n) => (
-            <React.Fragment key={n.id}>
-              <ListItem
-                alignItems="flex-start"
-                sx={{
-                  backgroundColor: n.isRead ? 'action.hover' : 'background.paper',
-                  borderLeft: 4,
-                  borderColor: n.isRead ? 'grey.500' : 'primary.main',
-                  pl: 2,
-                  pr: 10,
-                  py: 1.5
-                }}
-                secondaryAction={
-                  !n.isRead && (
-                    <Button
-                      key={n.id}
-                      variant="contained"
-                      size="small"
-                      onClick={() => markReadMutation.mutate(n.id)}
-                      disabled={markReadMutation.isPending}
-                      sx={{ mb: 10 }}>
-                      {markReadMutation.isPending ? 'Marking…' : 'Mark read'}
-                    </Button>
-                  )
-                }>
-                <ListItemText
-                  primary={
-                    <>
-                      <Typography variant="subtitle2" color="textSecondary">
-                        {new Date(n.notifiedAt).toLocaleString(undefined, {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </Typography>
-                      <Typography variant="h6">
-                        {n.workspaceName} &ndash; {n.taskName}
-                      </Typography>
-                    </>
-                  }
-                  secondary={
-                    <>
-                      <Typography variant="body1" color="textPrimary">
-                        {n.message}
-                      </Typography>
-                      <Typography variant="caption" color="textSecondary">
-                        by {n.creatorName}
-                      </Typography>
-                    </>
-                  }
-                />
-              </ListItem>
-              <Divider component="li" />
-            </React.Fragment>
+            <NotificationItem notification={n} />
           ))}
         </List>
       )}
