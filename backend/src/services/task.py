@@ -101,7 +101,7 @@ class TaskService:
                     notif = self.create_notification(
                         taskId=task.id,
                         event_type=EventTypeEnum.TASK_UNASSIGNED,
-                        message=f"You were unassigned by {actor.username}",
+                        message=f"You were unassigned",
                         recipient_ids=[rid],
                         creator_id=updatedBy
                     )
@@ -114,7 +114,7 @@ class TaskService:
                         event_type=EventTypeEnum.TASK_UNASSIGNED,
                         message=notif.message,
                         creator_id=updatedBy,
-                        creator_name=actor.username,
+                        creator_name=actor.fullName,
                         assignee_ids=[rid],
                         notified_at=notif.createdAt
                     )
@@ -125,7 +125,7 @@ class TaskService:
                     notif = self.create_notification(
                         taskId=task.id,
                         event_type=EventTypeEnum.TASK_ASSIGNED,
-                        message=f"You were assigned by {actor.username}",
+                        message=f"You were assigned",
                         recipient_ids=[aid],
                         creator_id=updatedBy
                     )
@@ -138,7 +138,7 @@ class TaskService:
                         event_type=EventTypeEnum.TASK_ASSIGNED,
                         message=notif.message,
                         creator_id=updatedBy,
-                        creator_name=actor.username,
+                        creator_name=actor.fullName,
                         assignee_ids=[aid],
                         notified_at=notif.createdAt
                     )
@@ -176,7 +176,7 @@ class TaskService:
                 event_type=evt,
                 message=notif.message,
                 creator_id=updatedBy,
-                creator_name=creator.username,
+                creator_name=creator.fullName,
                 assignee_ids=recipients,
                 notified_at=notif.createdAt,
             )
