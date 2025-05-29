@@ -18,20 +18,24 @@ import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import AddIcon from '@mui/icons-material/Add';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getWorkspace } from '../api/workspace/workspace';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { getNotifications } from '../api/notifications/notifications';
+import { type WorkspaceCreate } from '../api/fastAPI.schemas';
+import CreateWorkspaceDialog from '../components/CreateWorkspaceDialog';
 
 const drawerWidth = 240;
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, logout } = useUser();
-  const { getWorkspacesByUserApiWorkspaceAllGet } = getWorkspace();
+  const { getWorkspacesByUserApiWorkspaceAllGet, createWorkspaceApiWorkspacePost } = getWorkspace();
   const { countUnreadNotificationsApiNotificationsUnreadCountGet } = getNotifications();
   const [openWorkspaces, setOpenWorkspaces] = useState(false);
 
@@ -66,6 +70,18 @@ export default function DashboardLayout() {
       onClick: () => navigate('/notifications')
     }
   ];
+
+  //for workspace create
+  // local state for the form
+  const [openCreate, setOpenCreate] = useState(false);
+
+  const createWorkspaceMutation = useMutation({
+    mutationFn: (payload: WorkspaceCreate) => createWorkspaceApiWorkspacePost(payload),
+    onSuccess: (newWorkspace) => {
+      queryClient.invalidateQueries({ queryKey: ['userWorkspaces'] });
+      navigate(`/workspaces/${newWorkspace.id}`);
+    }
+  });
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -127,15 +143,41 @@ export default function DashboardLayout() {
                         </ListItemButton>
                       </ListItem>
                     ) : (
-                      workspaces?.map((ws) => (
-                        <ListItem key={ws.id} disablePadding>
+                      <>
+                        {workspaces?.map((ws) => (
+                          <ListItem key={ws.id} disablePadding>
+                            <ListItemButton
+                              onClick={() => navigate(`/workspaces/${ws.id}`)}
+                              sx={{
+                                pl: 6,
+                                py: 1.25,
+                                '&:hover': { bgcolor: '#374151' }
+                              }}>
+                              <ListItemText primary={ws.name} />
+                            </ListItemButton>
+                          </ListItem>
+                        ))}
+                        <ListItem disablePadding>
                           <ListItemButton
-                            onClick={() => navigate(`/workspaces/${ws.id}`)}
-                            sx={{ pl: 6, py: 1.25, '&:hover': { bgcolor: '#374151' } }}>
-                            <ListItemText primary={ws.name} />
+                            onClick={() => setOpenCreate(true)}
+                            sx={{
+                              pl: 6,
+                              py: 1.25,
+                              '&:hover': { bgcolor: '#374151' }
+                            }}>
+                            <ListItemIcon>
+                              <AddIcon sx={{ color: '#f1f5f9' }} />
+                            </ListItemIcon>
+                            <ListItemText primary="New Workspace" />
                           </ListItemButton>
                         </ListItem>
-                      ))
+                        <CreateWorkspaceDialog
+                          open={openCreate}
+                          loading={createWorkspaceMutation.isPending}
+                          onClose={() => setOpenCreate(false)}
+                          onCreate={(payload) => createWorkspaceMutation.mutate(payload)}
+                        />
+                      </>
                     )}
                   </List>
                 </Collapse>

@@ -1,5 +1,4 @@
-// src/pages/Workspace.tsx
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Box, Typography, CircularProgress, Alert, TextField, Button } from '@mui/material';
 import { getWorkspace } from '../api/workspace/workspace';
@@ -10,23 +9,31 @@ import { TaskItem } from '../components/TaskItem';
 import type { TaskResponse } from '../api/fastAPI.schemas';
 import { TaskDetail } from '../components/TaskDetail';
 import WorkspaceMemberSelector from '../components/WorkspaceMemberSelector';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 export default function Workspace() {
   const { id: workspaceId } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { user } = useUser();
+  const navigate = useNavigate();
 
   const {
     getWorkspaceByIdApiWorkspaceWorkspaceIdGet,
     getTasksByWorkspaceApiWorkspaceWorkspaceIdTasksGet,
-    getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet
+    getWorkspaceStatusesApiWorkspaceWorkspaceIdStatusesGet,
+    deleteWorkspaceApiWorkspaceDelete
   } = getWorkspace();
   const { createTaskApiTaskPost } = getTask();
 
   const [addingStatusId, setAddingStatusId] = useState<string | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
+  const [openConfirm, setOpenConfirm] = useState(false);
 
+  const handleCancel = () => setOpenConfirm(false);
+  const handleConfirm = () => {
+    deleteWorkspaceMutation.mutate({ workspace_id: workspaceId! });
+  };
   const {
     data: workspace,
     isLoading: isWorkspaceLoading,
@@ -66,6 +73,17 @@ export default function Workspace() {
     },
     onError: (err) => {
       console.error('Failed to create task:', err);
+    }
+  });
+
+  const deleteWorkspaceMutation = useMutation({
+    mutationFn: deleteWorkspaceApiWorkspaceDelete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userWorkspaces'] });
+      navigate('/');
+    },
+    onError: (err) => {
+      console.error('Failed to delete workspace:', err);
     }
   });
 
@@ -120,7 +138,25 @@ export default function Workspace() {
             {workspace?.name}
           </Typography>
 
-          <WorkspaceMemberSelector workspaceId={workspaceId!} />
+          <Box display={'grid'} gap={1.5}>
+            <WorkspaceMemberSelector workspaceId={workspaceId!} />
+
+            <Button variant="outlined" color="error" onClick={() => setOpenConfirm(true)}>
+              {deleteWorkspaceMutation.isPending ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                'Delete Workspace'
+              )}
+            </Button>
+          </Box>
+          <ConfirmDialog
+            open={openConfirm}
+            title="Delete Workspace"
+            description="Are you sure you want to delete this workspace?"
+            isLoading={deleteWorkspaceMutation.isPending}
+            onCancel={handleCancel}
+            onConfirm={handleConfirm}
+          />
         </Box>
 
         <Box display="flex" flexDirection="column" gap={6} mt={4}>
