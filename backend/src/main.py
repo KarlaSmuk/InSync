@@ -29,11 +29,3 @@ app.include_router(task_router)
 app.include_router(websocket_router)
 
 app.include_router(notifications_router)
-
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-# @app.get("/test-websocket/{userId}", response_class=HTMLResponse)
-# async def test_websocket():
-#    html_file = Path(__file__).parent / "static" / "test_ws.html"
-#    return HTMLResponse(content=html_file.read_text(), status_code=200)
