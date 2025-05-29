@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { TaskItem } from '../components/TaskItem';
 import type { TaskResponse } from '../api/fastAPI.schemas';
 import { TaskDetail } from '../components/TaskDetail';
+import WorkspaceMemberSelector from '../components/WorkspaceMemberSelector';
 
 export default function Workspace() {
   const { id: workspaceId } = useParams<{ id: string }>();
@@ -114,9 +115,13 @@ export default function Workspace() {
           bgcolor: '#FFFFFF',
           boxShadow: 3
         }}>
-        <Typography variant="h4" fontWeight={700} color="#1e293b" gutterBottom>
-          {workspace?.name}
-        </Typography>
+        <Box display={'flex'} justifyContent={'space-between'}>
+          <Typography variant="h4" fontWeight={700} color="#1e293b" gutterBottom>
+            {workspace?.name}
+          </Typography>
+
+          <WorkspaceMemberSelector workspaceId={workspaceId!} />
+        </Box>
 
         <Box display="flex" flexDirection="column" gap={6} mt={4}>
           {statuses?.map((status) => {
