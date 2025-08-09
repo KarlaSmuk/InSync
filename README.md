@@ -1,6 +1,8 @@
 # InSync
 
-Instructions for running the frontend and backend can be found in their respective folders.
+InSync is a collaborative task and workspace management web application designed to help teams organize, track and complete their work efficiently. It features real-time updates, intuitive task creation, assignment and status tracking within workspaces.
+
+**Instructions for running the frontend and backend can be found in their respective folders.**
 
 ## Database diagram
 
